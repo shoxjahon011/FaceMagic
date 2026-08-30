@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FaceMaagic - O'qituvchi Profili</title>
+<style>
+  :root {
+    --bg: #0c1120;
+    --card-bg: rgba(19, 26, 46, 0.75);
+    --card-header: rgba(16, 22, 42, 0.85);
+    --border: rgba(35, 43, 69, 0.8);
+    --stat-bg: rgba(12, 17, 32, 0.6);
+    --stat-border: rgba(42, 50, 80, 0.6);
+    --text: #f3f4f8;
+    --text-muted: #8b93ac;
+    --accent: #6a5cf0;
+    --accent-2: #8b7cf6;
+    --green: #3ddc84;
+    --orange: #f5a623;
+    --gold: #f0b429;
+    --red-dot: #ff5f56;
+    --yellow-dot: #ffbd2e;
+    --green-dot: #27c93f;
+    --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: radial-gradient(circle at 15% 15%, #1a1830 0%, #0b0e1a 45%, #05070f 100%);
+    font-family: var(--font);
+    color: var(--text);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .navbar {
+    width: 100%;
+    max-width: 900px;
+    background: rgba(19, 26, 46, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .nav-brand {
+    font-size: 18px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+  }
+
+  .nav-links { display: flex; gap: 20px; list-style: none; flex-wrap: wrap; align-items: center; }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+
+  /* Navbardagi Chats tugmasi uchun maxsus uslub */
+  .nav-chat-btn {
+    background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    color: #fff !important;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 600 !important;
+    transition: opacity 0.15s ease !important;
+  }
+  .nav-chat-btn:hover { opacity: 0.9; }
+
+  .action-row {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    gap: 14px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    flex: 1 1 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+
+  .action-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+  .action-btn.homework {
+    background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    color: #fff;
+  }
+
+  .action-btn.rating {
+    background: linear-gradient(135deg, #f5c451, var(--gold));
+    color: #1a1408;
+  }
+
+  .window {
+    width: 100%;
+    max-width: 440px;
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    margin-bottom: 24px;
+  }
+
+  .window-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--card-header);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .window-dots { display: flex; gap: 8px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: var(--red-dot); }
+  .dot.yellow { background: var(--yellow-dot); }
+  .dot.green { background: var(--green-dot); }
+  .window-filename { font-size: 13px; color: var(--text-muted); }
+
+  .menu-wrap { position: relative; }
+
+  .menu-dots-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: 2px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .menu-dots-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--text); }
+
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 180px;
+    background: #131a2e;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+    z-index: 50;
+  }
+
+  .dropdown-menu.open { display: block; }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .dropdown-item:hover { background: rgba(255, 255, 255, 0.08); }
+  .dropdown-item.logout { color: #ff8177; }
+  .dropdown-item.logout:hover { background: rgba(255, 95, 86, 0.12); }
+
+  .window-body { padding: 32px 28px 28px; }
+
+  /* --- AVATAR KONTENERI --- */
+  .avatar-wrap {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 16px;
+  }
+
+  .avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(106, 92, 240, 0.3);
+    font-size: 38px;
+    font-weight: 800;
+    color: white;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Kamera tugmasi (Chap taraf pastda) */
+  .upload-btn {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    width: 30px;
+    height: 30px;
+    background: var(--accent);
+    border: 2px solid #131a2e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease;
+    z-index: 3;
+  }
+
+  .upload-btn:hover { transform: scale(1.1); }
+
+  /* ✅ YASHIL ONLAYN INDIKATOR (O'ng taraf pastda) */
+  .online-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    background-color: var(--green-dot);
+    border: 3px solid #131a2e;
+    border-radius: 50%;
+    z-index: 3;
+  }
+
+  .online-badge::after {
+    content: '';
+    position: absolute;
+    top: -3px; left: -3px;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    border: 2px solid var(--green-dot);
+    animation: pulse 1.8s infinite ease-out;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  .profile-name { text-align: center; font-size: 22px; font-weight: 700; margin: 0 0 2px; }
+
+  /* NICKNAME / TAXALLUS Style */
+  .nickname-tag {
+    text-align: center;
+    font-size: 13px;
+    color: var(--accent-2);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .role-tag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin: 0 0 16px;
+  }
+
+  /* BIO BOX Style */
+  .bio-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #cbd5e1;
+    text-align: center;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    font-style: italic;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .stat-box {
+    background: var(--stat-bg);
+    border: 1px solid var(--stat-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .stat-value { font-size: 14px; font-weight: 700; color: var(--text); }
+  .stat-value.green { color: var(--green); }
+  .stat-value.orange { color: var(--orange); }
+
+  .section-title {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 22px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before, .section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .knowledge-card {
+    background: linear-gradient(135deg, rgba(106, 92, 240, 0.15), rgba(139, 124, 246, 0.05));
+    border: 1px solid var(--stat-border);
+    border-radius: 14px;
+    padding: 18px 16px;
+  }
+
+  .knowledge-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .knowledge-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .knowledge-value {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .knowledge-value.unset { font-size: 13px; color: var(--text-muted); -webkit-text-fill-color: var(--text-muted); background: none; font-weight: 600; }
+
+  .progress-track {
+    width: 100%;
+    height: 8px;
+    background: var(--stat-bg);
+    border: 1px solid var(--stat-border);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-2), var(--accent));
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  .knowledge-detail { font-size: 12.5px; color: var(--text-muted); }
+
+  .knowledge-link {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--accent-2);
+    text-decoration: none;
+  }
+  .knowledge-link:hover { text-decoration: underline; }
+
+  /* MODAL OYNASI */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(5, 7, 15, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal-card {
+    width: 100%;
+    max-width: 400px;
+    background: #131a2e;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .modal-title { font-size: 16px; font-weight: 700; color: var(--text); }
+  .close-btn { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
+  .form-control {
+    width: 100%;
+    background: var(--stat-bg);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13.5px;
+    outline: none;
+  }
+  .form-control:focus { border-color: var(--accent); }
+
+  .save-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+    margin-top: 6px;
+  }
+  .save-btn:hover { filter: brightness(1.1); }
+
+  @media (max-width: 600px) {
+    .navbar { flex-direction: column; gap: 12px; text-align: center; }
+    .nav-links { gap: 14px; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- YASHIRIN FORMALAR -->
+  <form id="logoutForm" method="post" action="{% url 'logout' %}" style="display:none;">
+    {% csrf_token %}
+  </form>
+
+  <form id="avatarForm" method="post" action="{% url 'update_teacher_avatar' %}" enctype="multipart/form-data" style="display:none;">
+    {% csrf_token %}
+    <input type="file" id="avatarInput" name="avatar" accept="image/*" onchange="uploadAvatar()">
+  </form>
+
+  <!-- NAVIGATSIYA -->
+  <nav class="navbar">
+    <a href="{% url 'home' %}" class="nav-brand">⚡ FaceMaagic</a>
+    <ul class="nav-links">
+      <li><a href="{% url 'teacher_dashboard' %}">Dashboard</a></li>
+      <li><a href="{% url 'find_user' %}">Do'st Qidirish</a></li>
+      <li><a href="{% url 'teacher_profile' %}" class="active">Profil</a></li>
+      <!-- Chats tugmasi qo'shildi -->
+      <li><a href="{% url 'chats' %}" class="nav-chat-btn">💬 Chats</a></li>
+    </ul>
+  </nav>
+
+  <div class="action-row">
+    <a href="{% url 'teacher_dashboard' %}" class="action-btn homework">📝 Uyga Vazifa Berish</a>
+    <a href="{% url 'student_rating_help' %}" class="action-btn rating">🏆 Reyting</a>
+  </div>
+
+  <!-- PROFIL OYNASI -->
+  <div class="window">
+    <div class="window-bar">
+      <div class="window-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="window-filename">teacher_profile.html</div>
+
+      <div class="menu-wrap">
+        <button type="button" class="menu-dots-btn" onclick="toggleAccountMenu(event)" aria-label="Menyu">&#8942;</button>
+        <div class="dropdown-menu" id="accountDropdown">
+          <button type="button" class="dropdown-item" onclick="openEditModal()">
+            <span>✏️</span> Profilni tahrirlash
+          </button>
+          <button type="button" class="dropdown-item logout" onclick="confirmLogout()">
+            <span>🚪</span> Tizimdan chiqish
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="window-body">
+      <!-- AVATAR, AMAL TUGMASI VA O'NG PASTDAGI YASHIL NUQTA -->
+      <div class="avatar-wrap">
+        {% if teacher.avatar %}
+          <img src="{{ teacher.avatar.url }}" alt="Avatar" class="avatar" id="avatarImg">
+        {% else %}
+          <div class="avatar" id="avatarImg">{{ teacher.full_name|slice:":1"|upper }}</div>
+        {% endif %}
+
+        <!-- Chap tomonda rasmni o'zgartirish tugmasi -->
+        <label for="avatarInput" class="upload-btn" title="Rasm yuklash">📷</label>
+
+        <!-- O'ng tomonda yashil onlayn nuqta -->
+        <span class="online-badge" title="Onlayn"></span>
+      </div>
+
+      <h1 class="profile-name">{{ teacher.full_name }}</h1>
+
+      {% if teacher.nickname %}
+        <div class="nickname-tag">@{{ teacher.nickname }}</div>
+      {% endif %}
+
+      <div class="role-tag">👨‍🏫 O'qituvchi</div>
+
+      <!-- BIO SEKSIYASI -->
+      {% if teacher.bio %}
+        <div class="bio-box">“{{ teacher.bio }}”</div>
+      {% endif %}
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Sinfi:</div>
+          <div class="stat-value">{{ teacher.classroom|default:"Kiritilmagan" }}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Fan:</div>
+          <div class="stat-value">{{ teacher.subject|default:"Kiritilmagan" }}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Vazifalar:</div>
+          <div class="stat-value green">{{ homework_count }} ta</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Login:</div>
+          <div class="stat-value orange">{{ teacher.user.username }}</div>
+        </div>
+      </div>
+
+      <div class="section-title">Sinf Bilim Darajasi</div>
+      <div class="knowledge-card">
+        <div class="knowledge-top">
+          <span class="knowledge-title">{{ teacher.classroom|default:"Sinf" }} — o'zlashtirish</span>
+          {% if knowledge_percent is not None %}
+            <span class="knowledge-value">{{ knowledge_percent }}%</span>
+          {% else %}
+            <span class="knowledge-value unset">Hali test yechilmagan</span>
+          {% endif %}
+        </div>
+
+        {% if knowledge_percent is not None %}
+          <div class="progress-track">
+            <div class="progress-fill" style="width: {{ knowledge_percent }}%;"></div>
+          </div>
+          <div class="knowledge-detail">
+            Jami {{ total_questions }} savoldan {{ total_correct }} tasiga to'g'ri javob berilgan.
+          </div>
+        {% else %}
+          <div class="knowledge-detail">
+            {{ teacher.classroom|default:"Bu sinf" }}dagi o'quvchilar hali AI test topshirmagan.
+          </div>
+        {% endif %}
+
+        <a href="{% url 'student_rating_help' %}" class="knowledge-link">To'liq reytingni ko'rish &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILNI TAHRIRLASH MODALI -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Profilni tahrirlash</h3>
+        <button type="button" class="close-btn" onclick="closeEditModal()">&times;</button>
+      </div>
+      <form method="post" action="{% url 'update_teacher_profile' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>F.I.SH (To'liq ismingiz)</label>
+          <input type="text" name="full_name" class="form-control" value="{{ teacher.full_name }}" required>
+        </div>
+        <div class="form-group">
+          <label>Taxallus (Nickname)</label>
+          <input type="text" name="nickname" class="form-control" value="{{ teacher.nickname|default:'' }}" placeholder="masalan: master_teacher">
+        </div>
+        <div class="form-group">
+          <label>Rahbarlik sinfi</label>
+          <input type="text" name="classroom" class="form-control" value="{{ teacher.classroom|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label>Dars beradigan faningiz</label>
+          <input type="text" name="subject" class="form-control" value="{{ teacher.subject|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label>Haqida (Bio)</label>
+          <textarea name="bio" class="form-control" rows="2" placeholder="O'zingiz haqida qisqacha ma'lumot...">{{ teacher.bio|default:'' }}</textarea>
+        </div>
+        <button type="submit" class="save-btn">Saqlash</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function toggleAccountMenu(event) {
+      event.stopPropagation();
+      document.getElementById('accountDropdown').classList.toggle('open');
+    }
+
+    function openEditModal() {
+      document.getElementById('editModal').classList.add('active');
+      document.getElementById('accountDropdown').classList.remove('open');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('active');
+    }
+
+    function uploadAvatar() {
+      document.getElementById('avatarForm').submit();
+    }
+
+    function confirmLogout() {
+      if (confirm("Rostdan ham tizimdan chiqmoqchimisiz?")) {
+        document.getElementById('logoutForm').submit();
+      }
+    }
+
+    document.addEventListener('click', function (event) {
+      const dropdown = document.getElementById('accountDropdown');
+      const menuWrap = event.target.closest('.menu-wrap');
+      if (dropdown && dropdown.classList.contains('open') && !menuWrap) {
+        dropdown.classList.remove('open');
+      }
+    });
+  </script>
+
+</body>
+</html>

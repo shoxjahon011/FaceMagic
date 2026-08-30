@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FaceMaagic - Profil</title>
+
+<!-- CROPPER.JS CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
+
+<style>
+  :root {
+    --bg: #0c1120;
+    --card-bg: rgba(19, 26, 46, 0.75);
+    --card-header: rgba(10, 16, 34, 0.85);
+    --border: rgba(35, 43, 69, 0.8);
+    --stat-bg: rgba(12, 17, 32, 0.6);
+    --stat-border: rgba(42, 50, 80, 0.6);
+    --text: #f3f4f8;
+    --text-muted: #8b93ac;
+    --accent: #6a5cf0;
+    --accent-2: #8b7cf6;
+    --green: #3ddc84;
+    --orange: #f5a623;
+    --gold: #ffd700;
+    --silver: #c0c5ce;
+    --bronze: #cd7f32;
+    --red-dot: #ff5f56;
+    --yellow-dot: #ffbd2e;
+    --green-dot: #27c93f;
+    --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    min-height: 100vh;
+    background: radial-gradient(circle at 15% 15%, #1a1830 0%, #0b0e1a 45%, #05070f 100%);
+    font-family: var(--font);
+    color: var(--text);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* NAVBAR */
+  .navbar {
+    width: 100%; max-width: 900px; background: rgba(19, 26, 46, 0.6);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .nav-brand {
+    font-size: 18px; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-decoration: none; letter-spacing: 0.5px;
+  }
+
+  .nav-links { display: flex; gap: 16px; list-style: none; }
+  .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 13.5px; font-weight: 500; transition: color 0.2s ease; }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+
+  /* WINDOW CARD */
+  .window {
+    width: 100%; max-width: 440px; background: var(--card-bg);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); margin-bottom: 24px;
+  }
+
+  .window-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: var(--card-header); border-bottom: 1px solid var(--border);
+  }
+
+  .window-dots { display: flex; gap: 8px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: var(--red-dot); }
+  .dot.yellow { background: var(--yellow-dot); }
+  .dot.green { background: var(--green-dot); }
+  .window-filename { font-size: 13px; color: var(--text-muted); }
+
+  /* DROPDOWN MENU */
+  .menu-wrap { position: relative; }
+  .menu-dots-btn { background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 8px; }
+  .menu-dots-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--text); }
+  .dropdown-menu { display: none; position: absolute; top: calc(100% + 6px); right: 0; min-width: 180px; background: #131a2e; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45); overflow: hidden; z-index: 50; }
+  .dropdown-menu.open { display: block; }
+  .dropdown-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 14px; background: none; border: none; color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-align: left; }
+  .dropdown-item:hover { background: rgba(255, 255, 255, 0.08); }
+  .dropdown-item.danger { color: #ff8177; }
+  .dropdown-item.danger:hover { background: rgba(255, 95, 86, 0.12); }
+
+  .window-body { padding: 32px 20px 24px; }
+
+  /* AVATAR WRAPPER & 7 TA ORBITAL TITULLAR UCHUN KENGAYTIRILDI */
+  .avatar-wrap {
+    position: relative;
+    width: 220px;
+    height: 190px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: #0c1120;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; cursor: pointer;
+    border: 3px solid var(--border);
+    z-index: 2;
+    transition: transform 0.25s ease;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  }
+  .avatar:active { transform: scale(0.95); }
+
+  .avatar-img-holder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .avatar-img-holder img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* ORBITAL TITLES/ACHIEVEMENTS */
+  .achievements-orbit {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .orbit-item {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .orbit-item:hover {
+    transform: scale(1.3) !important;
+    z-index: 20;
+  }
+
+  .orbit-glow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    filter: blur(6px);
+    z-index: -1;
+    opacity: 0.85;
+    animation: orbitPulse 2s infinite alternate ease-in-out;
+  }
+
+  .orbit-icon {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.8));
+  }
+
+  /* RARITY RANG QATLAMLARI (GLOW COLORS) */
+  .rarity-legendary .orbit-glow { background: radial-gradient(circle, #ffd700 0%, rgba(255, 215, 0, 0) 75%); }
+  .rarity-epic .orbit-glow { background: radial-gradient(circle, #a855f7 0%, rgba(168, 85, 247, 0) 75%); }
+  .rarity-rare .orbit-glow { background: radial-gradient(circle, #3b82f6 0%, rgba(59, 130, 246, 0) 75%); }
+  .rarity-common .orbit-glow { background: radial-gradient(circle, #8b93ac 0%, rgba(139, 147, 172, 0) 75%); }
+
+  /* 7 TA IKONKA UCHUN 7 XIL POZITSIYA (TEPAROQGA VA YONLARGA TAQSIMLANDI) */
+  .pos-1 { top: -8px; left: 15px; }
+  .pos-2 { top: -24px; left: 88px; }
+  .pos-3 { top: -8px; right: 15px; }
+  .pos-4 { top: 38px; left: -10px; }
+  .pos-5 { top: 38px; right: -10px; }
+  .pos-6 { top: 90px; left: -14px; }
+  .pos-7 { top: 90px; right: -14px; }
+
+  @keyframes orbitPulse {
+    0% { transform: scale(0.9); opacity: 0.6; }
+    100% { transform: scale(1.15); opacity: 1; }
+  }
+
+  .avatar-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(12, 17, 32, 0.65); display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.2s ease; border-radius: 50%;
+  }
+  .avatar:hover .avatar-overlay { opacity: 1; }
+  .avatar-overlay span { font-size: 22px; }
+
+  /* YASHIL NUQTA */
+  .status-dot {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    background: var(--green-dot);
+    border: 3px solid #131a2e;
+    border-radius: 50%;
+    z-index: 10;
+    box-shadow: 0 0 10px rgba(39, 201, 63, 0.8);
+    pointer-events: none;
+  }
+
+  /* TAQILGAN TITUL BADGE */
+  .equipped-title-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 6px;
+    margin-bottom: 12px;
+  }
+
+  .equipped-title-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 26px;
+    background: linear-gradient(135deg, #e21b2e, #a30f1e);
+    clip-path: polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%);
+    box-shadow: 0 4px 14px rgba(197, 24, 40, 0.45);
+  }
+
+  .equipped-title-text {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+
+  .profile-name { text-align: center; font-size: 20px; font-weight: 700; margin: 0 0 2px; word-break: break-word; }
+
+  .profile-nickname {
+    text-align: center; font-size: 14px; color: var(--accent-2);
+    font-weight: 700; margin: 0 0 4px; word-break: break-word;
+  }
+
+  .profile-bio-text {
+    text-align: center; font-size: 12.5px; color: var(--text-muted);
+    margin: 0 0 10px; font-style: italic; word-break: break-word;
+    padding: 0 8px; line-height: 1.4;
+  }
+
+  .profile-id { text-align: center; font-size: 11px; color: var(--text-muted); font-weight: 500; margin: 0 0 20px; font-family: 'Courier New', monospace; letter-spacing: 0.5px; }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-box { background: var(--stat-bg); border: 1px solid var(--stat-border); border-radius: 12px; padding: 12px 14px; }
+  .stat-label { font-size: 10px; letter-spacing: 0.04em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+  .stat-value { font-size: 13.5px; font-weight: 700; color: var(--text); word-break: break-word; }
+  .stat-value.green { color: var(--green); }
+  .stat-value.orange { color: var(--orange); }
+
+  .section-title { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin: 20px 0 10px; display: flex; align-items: center; gap: 8px; }
+  .section-title::before, .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+  .cert-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cert-box { background: var(--stat-bg); border: 1px solid var(--stat-border); border-radius: 12px; padding: 12px 6px; text-align: center; }
+  .cert-icon { font-size: 20px; margin-bottom: 4px; }
+  .cert-count { font-size: 16px; font-weight: 800; }
+  .cert-label { font-size: 9.5px; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+  .cert-box.gold .cert-count { color: var(--gold); }
+  .cert-box.silver .cert-count { color: var(--silver); }
+  .cert-box.bronze .cert-count { color: var(--bronze); }
+
+  .iq-card { background: linear-gradient(135deg, rgba(106, 92, 240, 0.15), rgba(139, 124, 246, 0.05)); border: 1px solid var(--stat-border); border-radius: 14px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .iq-info { display: flex; flex-direction: column; gap: 2px; }
+  .iq-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+  .iq-value { font-size: 24px; font-weight: 800; background: linear-gradient(135deg, var(--accent-2), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .iq-value.unset { font-size: 13px; color: var(--text-muted); -webkit-text-fill-color: var(--text-muted); background: none; }
+
+  .btn-iq { background: linear-gradient(135deg, var(--accent-2), var(--accent)); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .btn-iq:active { opacity: 0.85; }
+
+  /* MODAL STYLES */
+  .modal {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(5, 7, 15, 0.85); backdrop-filter: blur(6px);
+    justify-content: center; align-items: center; z-index: 1000; padding: 16px;
+  }
+  .modal-content {
+    background: #131a2e; width: 100%; max-width: 420px;
+    border-radius: 16px; padding: 20px; position: relative; border: 1px solid var(--border);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .close-btn { position: absolute; top: 12px; right: 16px; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; padding: 4px; }
+
+  .crop-container { width: 100%; max-height: 280px; margin: 14px 0; overflow: hidden; background: #0b0e1a; border-radius: 10px; }
+  .crop-container img { max-width: 100%; }
+
+  .modal-form { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+  .form-field { display: flex; flex-direction: column; gap: 4px; }
+  .form-label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.04em; }
+  .form-input, .form-textarea {
+    width: 100%; background: #0b0e1a; border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 13px; outline: none; transition: border-color 0.2s;
+  }
+  .form-textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+  .form-input:focus, .form-textarea:focus { border-color: var(--accent-2); }
+
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+  .btn-save { background: linear-gradient(135deg, var(--accent-2), var(--accent)); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .btn-cancel { background: rgba(255, 255, 255, 0.1); color: var(--text); border: none; padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .btn-danger { background: linear-gradient(135deg, #ff5f56, #e03e3e); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; }
+
+  @media (max-width: 576px) {
+    body { padding: 12px 10px; }
+    .navbar { flex-direction: column; gap: 10px; padding: 10px 14px; border-radius: 12px; margin-bottom: 16px; }
+    .nav-links { gap: 12px; }
+    .nav-links a { font-size: 12.5px; }
+    .window-body { padding: 24px 14px 20px; }
+    .avatar-overlay { opacity: 1; background: rgba(12, 17, 32, 0.35); }
+    .iq-card { flex-direction: column; align-items: stretch; text-align: center; gap: 10px; }
+    .btn-iq { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="{% url 'home' %}" class="nav-brand">⚡ FaceMaagic</a>
+    <ul class="nav-links">
+      <li><a href="{% url 'home' %}">Bosh sahifa</a></li>
+      <li><a href="{% url 'student_profile' %}" class="active">Profil</a></li>
+      <li><a href="{% url 'achievements' %}">🏆 Yutuqlar</a></li>
+    </ul>
+  </nav>
+
+  <form id="logoutForm" method="post" action="{% url 'logout' %}" style="display:none;">
+    {% csrf_token %}
+  </form>
+
+  <div class="window">
+    <div class="window-bar">
+      <div class="window-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="window-filename">student_profile.html</div>
+
+      <div class="menu-wrap">
+        <button type="button" class="menu-dots-btn" onclick="toggleAccountMenu(event)" aria-label="Menyu">&#8942;</button>
+        <div class="dropdown-menu" id="accountDropdown">
+          <button type="button" class="dropdown-item" onclick="openEditProfileModal()">
+            <span>✏️</span> Profilni tahrirlash
+          </button>
+          <button type="button" class="dropdown-item danger" onclick="openLogoutModal()">
+            <span>🚪</span> Tizimdan chiqish
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="window-body">
+
+      <div class="avatar-wrap">
+        <!-- ORBITA IKONKALARI (7 TA Qilib O'zgartirildi) -->
+        <div class="achievements-orbit">
+          {% for ua in profile.achievements.all|dictsortreversed:"achievement.rarity"|slice:":7" %}
+            <div class="orbit-item pos-{{ forloop.counter }} rarity-{{ ua.achievement.rarity }}"
+                 title="{{ ua.achievement.name }}"
+                 onclick="openIconModal('{% if ua.achievement.icon_image %}{{ ua.achievement.icon_image.url }}{% endif %}', '{{ ua.achievement.name|escapejs }}', '{{ ua.achievement.get_rarity_display|escapejs }}')">
+              <div class="orbit-glow"></div>
+              {% if ua.achievement.icon_image %}
+                <img src="{{ ua.achievement.icon_image.url }}" alt="{{ ua.achievement.name }}" class="orbit-icon">
+              {% else %}
+                <span class="orbit-icon" style="display:flex;align-items:center;justify-content:center;font-size:24px;">🏆</span>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+
+        <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" onchange="onFileSelected(this)">
+
+        <!-- AVATAR VA STATUS DOT CONTAINER -->
+        <div class="avatar" onclick="triggerAvatarUpload()" title="Rasmni almashtirish">
+          <div class="avatar-img-holder">
+            {% if profile.avatar %}
+              <img id="avatarImage" src="{{ profile.avatar.url }}" alt="Avatar">
+            {% else %}
+              <div id="avatarFallback" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                <svg viewBox="0 0 24 24" fill="none" width="54" height="54" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L1 7l11 5 9-4.09V17h2V7L12 2z" fill="white"/>
+                  <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" fill="white"/>
+                </svg>
+              </div>
+              <img id="avatarImage" src="" alt="Avatar" style="display: none;">
+            {% endif %}
+
+            <div class="avatar-overlay">
+              <span>📷</span>
+            </div>
+          </div>
+          <span class="status-dot" title="Onlayn"></span>
+        </div>
+      </div>
+
+      <!-- TAQILGAN TITUL BADGE -->
+      {% if profile.equipped_title %}
+        <div class="equipped-title-wrap">
+          <div class="equipped-title-badge">
+            <span class="equipped-title-text">{{ profile.equipped_title }}</span>
+          </div>
+        </div>
+      {% endif %}
+
+      <h1 class="profile-name">{{ profile.full_name|default:request.user.get_full_name|default:request.user.username }}</h1>
+
+      <p class="profile-nickname">
+        {% if profile.nickname %}
+          {{ profile.nickname }}
+        {% else %}
+          Taxallus o'rnatilmagan
+        {% endif %}
+      </p>
+
+      {% if profile.bio %}
+        <p class="profile-bio-text">"{{ profile.bio }}"</p>
+      {% endif %}
+
+      <p class="profile-id">ID: {{ profile.profile_code|default:request.user.id }}</p>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Sinf:</div>
+          <div class="stat-value">{{ profile.classroom|default:"Biriktirilmagan" }}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Telefon:</div>
+          <div class="stat-value">{{ profile.phone|default:"Kiritilmagan" }}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Test Reytingi:</div>
+          <div class="stat-value green">{{ profile.score|default:"0" }} Ball</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Yillik Umumiy Ball:</div>
+          <div class="stat-value orange">{{ profile.yearly_score|default:"0" }} Ball</div>
+        </div>
+      </div>
+
+      <div class="section-title">Sertifikatlar</div>
+      <div class="cert-grid">
+        <div class="cert-box gold">
+          <div class="cert-icon">🥇</div>
+          <div class="cert-count">{{ profile.gold_certificates|default:"0" }}</div>
+          <div class="cert-label">Oltin</div>
+        </div>
+        <div class="cert-box silver">
+          <div class="cert-icon">🥈</div>
+          <div class="cert-count">{{ profile.silver_certificates|default:"0" }}</div>
+          <div class="cert-label">Kumush</div>
+        </div>
+        <div class="cert-box bronze">
+          <div class="cert-icon">🥉</div>
+          <div class="cert-count">{{ profile.bronze_certificates|default:"0" }}</div>
+          <div class="cert-label">Bronza</div>
+        </div>
+      </div>
+
+      <div class="section-title">IQ Darajasi</div>
+      <div class="iq-card">
+        <div class="iq-info">
+          <span class="iq-title">Sizning IQ ballingiz</span>
+          {% if profile.iq_score %}
+            <span class="iq-value">{{ profile.iq_score }}</span>
+          {% else %}
+            <span class="iq-value unset">Hali o'lchanmagan</span>
+          {% endif %}
+        </div>
+        <button class="btn-iq">IQ ni o'lchash</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ICON (RASM) KO'RISH MODALI -->
+  <div class="modal" id="iconViewModal" onclick="closeIconModal()">
+    <div class="modal-content" style="text-align: center; background: rgba(19, 26, 46, 0.95); border: 1px solid var(--accent); max-width: 340px; padding: 24px 16px;" onclick="event.stopPropagation()">
+      <span class="close-btn" onclick="closeIconModal()">&times;</span>
+      <div id="modalIconContainer" style="margin-bottom: 14px; display: flex; justify-content: center; align-items: center;"></div>
+      <h3 id="modalIconTitle" style="font-size: 17px; color: var(--text); margin-bottom: 6px;"></h3>
+      <p id="modalIconRarity" style="font-size: 12px; color: var(--accent-2); font-weight: 700; text-transform: uppercase;"></p>
+    </div>
+  </div>
+
+  <!-- TAHRIRLASH MODALI -->
+  <div class="modal" id="editProfileModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeEditProfileModal()">&times;</span>
+      <h3 style="margin-bottom: 6px; font-size: 16px;">✏️ Profilni tahrirlash</h3>
+      <p style="font-size: 11.5px; color: var(--text-muted);">Ma'lumotlaringizni yangilang va saqlang.</p>
+
+      <form method="post" action="{% url 'update_profile_info' %}" class="modal-form">
+        {% csrf_token %}
+
+        <div class="form-field">
+          <label for="nicknameInput" class="form-label">Nickname:</label>
+          <input type="text" id="nicknameInput" name="nickname" class="form-input" value="{{ profile.nickname|default:'' }}" placeholder="Shadow, pro_dev...">
+        </div>
+
+        <div class="form-field">
+          <label for="usernameInput" class="form-label">Login (Username):</label>
+          <input type="text" id="usernameInput" name="username" class="form-input" value="{{ request.user.username }}" required>
+        </div>
+
+        <div class="form-field">
+          <label for="phoneInput" class="form-label">Telefon raqam:</label>
+          <input type="text" id="phoneInput" name="phone" class="form-input" value="{{ profile.phone|default:'' }}" placeholder="+998 90 123 45 67">
+        </div>
+
+        <div class="form-field">
+          <label for="passwordInput" class="form-label">Yangi Parol (ixtiyoriy):</label>
+          <input type="password" id="passwordInput" name="password" class="form-input" placeholder="Yangi parol kiriting...">
+        </div>
+
+        <div class="form-field">
+          <label for="confirmPasswordInput" class="form-label">Parolni tasdiqlang:</label>
+          <input type="password" id="confirmPasswordInput" name="confirm_password" class="form-input" placeholder="Parolni takrorlang...">
+        </div>
+
+        <div class="form-field">
+          <label for="bioInput" class="form-label">Bio (O'zingiz haqida):</label>
+          <textarea id="bioInput" name="bio" class="form-textarea" placeholder="O'zingiz haqida qisqacha yozing...">{{ profile.bio|default:'' }}</textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeEditProfileModal()">Bekor qilish</button>
+          <button type="submit" class="btn-save">Saqlash</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CHIQISH MODALI -->
+  <div class="modal" id="logoutConfirmModal">
+    <div class="modal-content" style="text-align: center;">
+      <h3 style="margin-bottom: 8px; font-size: 17px;">🚪 Tizimdan chiqish</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Siz rostdan ham profildan chiqmoqchimisiz?</p>
+
+      <div class="modal-actions" style="justify-content: center;">
+        <button class="btn-cancel" onclick="closeLogoutModal()">Yo'q, qolaman</button>
+        <button class="btn-danger" onclick="submitLogout()">Ha, chiqaman</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CROP MODAL -->
+  <div class="modal" id="cropModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeCropModal()">&times;</span>
+      <h3 style="margin-bottom: 6px; font-size: 16px;">Rasmni to'g'rilang</h3>
+      <p style="font-size: 11.5px; color: var(--text-muted);">Rasmni mos o'lchamda kesib oling hamda Saqlash tugmasini bosing.</p>
+
+      <div class="crop-container">
+        <img id="cropImage" src="" alt="Crop Area">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeCropModal()">Bekor qilish</button>
+        <button class="btn-save" onclick="saveCroppedAvatar()">Saqlash</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+  <script>
+    let cropper = null;
+
+    function openIconModal(imgUrl, title, rarity) {
+      const container = document.getElementById('modalIconContainer');
+      const titleEl = document.getElementById('modalIconTitle');
+      const rarityEl = document.getElementById('modalIconRarity');
+
+      if (imgUrl) {
+        container.innerHTML = `<img src="${imgUrl}" style="width: 130px; height: 130px; object-fit: contain; filter: drop-shadow(0 0 16px rgba(139, 124, 246, 0.6));">`;
+      } else {
+        container.innerHTML = `<span style="font-size: 72px;">🏆</span>`;
+      }
+
+      titleEl.innerText = title;
+      rarityEl.innerText = rarity + " Yutuq";
+
+      document.getElementById('iconViewModal').style.display = 'flex';
+    }
+
+    function closeIconModal() {
+      document.getElementById('iconViewModal').style.display = 'none';
+    }
+
+    function toggleAccountMenu(event) {
+      event.stopPropagation();
+      document.getElementById('accountDropdown').classList.toggle('open');
+    }
+
+    document.addEventListener('click', function() {
+      const dropdown = document.getElementById('accountDropdown');
+      if (dropdown && dropdown.classList.contains('open')) {
+        dropdown.classList.remove('open');
+      }
+    });
+
+    function openEditProfileModal() {
+      document.getElementById('editProfileModal').style.display = 'flex';
+    }
+
+    function closeEditProfileModal() {
+      document.getElementById('editProfileModal').style.display = 'none';
+    }
+
+    function openLogoutModal() {
+      document.getElementById('logoutConfirmModal').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+      document.getElementById('logoutConfirmModal').style.display = 'none';
+    }
+
+    function submitLogout() {
+      document.getElementById('logoutForm').submit();
+    }
+
+    function triggerAvatarUpload() {
+      document.getElementById('avatarFileInput').click();
+    }
+
+    function onFileSelected(input) {
+      if (!input.files || !input.files[0]) return;
+
+      const file = input.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const cropImg = document.getElementById('cropImage');
+        cropImg.src = e.target.result;
+
+        document.getElementById('cropModal').style.display = 'flex';
+
+        if (cropper) {
+          cropper.destroy();
+        }
+
+        cropper = new Cropper(cropImg, {
+          aspectRatio: 1,
+          viewMode: 1,
+          background: false,
+          autoCropArea: 1,
+        });
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    function closeCropModal() {
+      document.getElementById('cropModal').style.display = 'none';
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      document.getElementById('avatarFileInput').value = '';
+    }
+
+    function saveCroppedAvatar() {
+      if (!cropper) return;
+
+      const canvas = cropper.getCroppedCanvas({
+        width: 300,
+        height: 300,
+      });
+
+      canvas.toBlob(async function (blob) {
+        const avatarImg = document.getElementById('avatarImage');
+        const fallback = document.getElementById('avatarFallback');
+
+        avatarImg.src = URL.createObjectURL(blob);
+        avatarImg.style.display = 'block';
+        if (fallback) fallback.style.display = 'none';
+
+        closeCropModal();
+
+        const formData = new FormData();
+        formData.append('avatar', blob, 'avatar.jpg');
+
+        try {
+          const response = await fetch('/api/update-avatar/', {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: formData
+          });
+
+          const data = await response.json();
+          if (data.status === 'success') {
+            console.log("Rasm muvaffaqiyatli saqlandi!");
+          } else {
+            console.error("Xatolik:", data.message);
+          }
+        } catch (err) {
+          console.error("Server bilan bog'lanishda xatolik:", err);
+        }
+      }, 'image/jpeg');
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Biriktirish - FaceMaagic</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: radial-gradient(circle at 15% 15%, #1a1830 0%, #0b0e1a 45%, #05070f 100%);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #e7e9f2;
+    padding: 48px 40px;
+  }
+
+  .header { max-width: 720px; margin: 0 auto 32px; }
+
+  .header h1 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .header h1 .icon { font-size: 24px; color: #6c5ce7; }
+
+  .header p {
+    margin-top: 8px;
+    margin-left: 38px;
+    color: #8b90a8;
+    font-size: 14.5px;
+  }
+
+  .window {
+    max-width: 720px;
+    margin: 0 auto;
+    background: #10131f;
+    border: 1px solid #262a3d;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+  }
+
+  .titlebar {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #23273a;
+  }
+
+  .dots { display: flex; gap: 7px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green { background: #28c840; }
+
+  .titlebar .filename { margin-left: auto; font-size: 13px; color: #6b7080; }
+
+  .window-body { padding: 24px 28px 28px; }
+
+  .field { margin-bottom: 16px; }
+
+  .field label {
+    display: block;
+    font-size: 13.5px;
+    color: #b7bacb;
+    margin-bottom: 8px;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    background: #191d2c;
+    border: 1px solid #2c3146;
+    color: #eef0f8;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14.5px;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .field input:focus, .field select:focus { border-color: #6c5ce7; }
+
+  .row-2 { display: flex; gap: 16px; }
+  .row-2 .field { flex: 1; }
+
+  .generate-btn {
+    width: 100%;
+    background: #6c5ce7;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 0;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s ease;
+    margin-top: 4px;
+  }
+
+  .generate-btn:hover { background: #5b4bd6; }
+  .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .attach-btn {
+    width: 100%;
+    background: #1fb872;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 0;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 18px;
+    transition: background 0.15s ease;
+  }
+
+  .attach-btn:hover { background: #18a563; }
+  .attach-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13.5px;
+    color: #8b90a8;
+    text-decoration: none;
+  }
+  .back-link:hover { color: #eef0f8; }
+
+  .alert {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .alert-error { background: #321313; color: #ff5f57; border: 1px solid #5c1f1f; }
+  .alert-success { background: #133226; color: #3ddc97; border: 1px solid #1f5c48; }
+
+  /* --- Savollar preview --- */
+  #previewBox { margin-top: 20px; display: none; }
+
+  .preview-title {
+    font-size: 13.5px;
+    color: #b7bacb;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .q-card {
+    background: #191d2c;
+    border: 1px solid #2c3146;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .q-card .q-text {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #eef0f8;
+  }
+
+  .q-card .q-opt {
+    font-size: 13px;
+    color: #9096ac;
+    padding: 3px 0;
+  }
+
+  .q-card .q-opt.correct {
+    color: #3ddc97;
+    font-weight: 600;
+  }
+
+  .spinner-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px 0;
+    color: #8b90a8;
+    font-size: 14px;
+  }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 3px solid #2c3146;
+    border-top-color: #6c5ce7;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1><span class="icon">&#129504;</span> AI Bilan Test Biriktirish</h1>
+    <p>attach_quiz.html — Uy vazifasiga avtomatik test qo'shish</p>
+  </div>
+
+  <div class="window">
+    <div class="titlebar">
+      <div class="dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="filename">attach_quiz.html</span>
+    </div>
+
+    <div class="window-body">
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="field">
+        <label for="topicInput">Mavzu / Fan</label>
+        <input type="text" id="topicInput" value="{{ topic|default:'' }}" placeholder="Kvadrat tenglamalar va Viyet teoremasi" required />
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="difficultySelect">Qiyinchilik darajasi</label>
+          <select id="difficultySelect">
+            <option value="Oson">Oson</option>
+            <option value="O'rtacha" selected>O'rtacha</option>
+            <option value="Qiyin">Qiyin</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="countSelect">Savollar soni</label>
+          <select id="countSelect">
+            <option value="3">3 ta</option>
+            <option value="5" selected>5 ta</option>
+            <option value="10">10 ta</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="button" class="generate-btn" id="generateBtn" onclick="generateQuiz()">
+        &#10024; AI bilan test generatsiya qilish
+      </button>
+
+      <div id="loadingRow" class="spinner-row" style="display:none;">
+        <div class="spinner"></div>
+        <span>AI savollarni tuzmoqda...</span>
+      </div>
+
+      <div id="previewBox">
+        <div class="preview-title">Generatsiya qilingan savollar (tekshirib chiqing):</div>
+        <div id="questionsList"></div>
+      </div>
+
+      <form method="POST" action="{% url 'attach_quiz' %}" id="attachForm">
+        {% csrf_token %}
+        <input type="hidden" name="topic" id="topicHidden" value="{{ topic|default:'' }}">
+        <input type="hidden" name="questions_json" id="questionsHidden" value="[]">
+        <button type="submit" class="attach-btn" id="attachBtn" disabled>
+          &#9989; Testni Vazifaga Biriktirish
+        </button>
+      </form>
+
+      <a href="{% url 'create_homework' %}" class="back-link">&larr; Vazifaga qaytish (test biriktirmasdan)</a>
+    </div>
+  </div>
+
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  let generatedQuestions = [];
+
+  async function generateQuiz() {
+    const topic = document.getElementById('topicInput').value.trim();
+    if (!topic) {
+      alert("Iltimos, avval mavzu nomini kiriting!");
+      return;
+    }
+
+    const difficulty = document.getElementById('difficultySelect').value;
+    const count = document.getElementById('countSelect').value;
+
+    const generateBtn = document.getElementById('generateBtn');
+    const loadingRow = document.getElementById('loadingRow');
+    const previewBox = document.getElementById('previewBox');
+    const attachBtn = document.getElementById('attachBtn');
+
+    generateBtn.disabled = true;
+    attachBtn.disabled = true;
+    loadingRow.style.display = 'flex';
+    previewBox.style.display = 'none';
+
+    try {
+      const response = await fetch('/api/ai-generate-test/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+          topic: topic,
+          subject: topic,
+          difficulty: difficulty,
+          count: parseInt(count, 10),
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        generatedQuestions = data.questions;
+        renderPreview(generatedQuestions);
+
+        document.getElementById('topicHidden').value = topic;
+        document.getElementById('questionsHidden').value = JSON.stringify(generatedQuestions);
+
+        previewBox.style.display = 'block';
+        attachBtn.disabled = false;
+      } else {
+        alert("Xatolik: " + data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server bilan bog'lanishda xatolik yuz berdi.");
+    } finally {
+      generateBtn.disabled = false;
+      loadingRow.style.display = 'none';
+    }
+  }
+
+  function renderPreview(questions) {
+    const list = document.getElementById('questionsList');
+    list.innerHTML = '';
+
+    questions.forEach((q, idx) => {
+      const card = document.createElement('div');
+      card.className = 'q-card';
+
+      const qText = document.createElement('div');
+      qText.className = 'q-text';
+      qText.textContent = `${idx + 1}. ${q.question}`;
+      card.appendChild(qText);
+
+      (q.options || []).forEach(opt => {
+        const optEl = document.createElement('div');
+        optEl.className = 'q-opt' + (opt === q.correct_answer ? ' correct' : '');
+        optEl.textContent = opt === q.correct_answer ? `${opt}  ✓` : opt;
+        card.appendChild(optEl);
+      });
+
+      list.appendChild(card);
+    });
+  }
+</script>
+
+</body>
+</html>

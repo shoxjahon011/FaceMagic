@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O'qituvchi Dashboardi: Vazifa Yaratish</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: radial-gradient(circle at 15% 15%, #1a1830 0%, #0b0e1a 45%, #05070f 100%);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #e7e9f2;
+    padding: 24px 40px 48px;
+  }
+
+  /* --- Navbar --- */
+  .navbar {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+    background: rgba(19, 26, 46, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .nav-brand {
+    font-size: 18px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #8b7cf6, #6a5cf0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+  }
+
+  .nav-links { display: flex; gap: 20px; list-style: none; flex-wrap: wrap; align-items: center; }
+
+  .nav-links a {
+    color: #8b90a8;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .nav-links a:hover, .nav-links a.active { color: #f3f4f8; }
+
+  .nav-chat-btn {
+    background: linear-gradient(135deg, #6c5ce7, #4834d4);
+    color: #fff !important;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 600 !important;
+    transition: opacity 0.15s ease !important;
+  }
+  .nav-chat-btn:hover { opacity: 0.9; }
+
+  .header {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+  }
+
+  .header h1 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .header h1 .icon {
+    font-size: 26px;
+    color: #6c5ce7;
+    font-weight: 900;
+  }
+
+  .header p {
+    margin-top: 10px;
+    margin-left: 42px;
+    color: #8b90a8;
+    font-size: 15px;
+  }
+
+  .action-row {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    flex: 1 1 220px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    border: 1px solid transparent;
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+
+  .action-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+  .action-btn .emoji { font-size: 22px; }
+
+  .action-btn.homework {
+    background: linear-gradient(135deg, #6c5ce7, #4834d4);
+    color: #fff;
+  }
+
+  .action-btn.rating {
+    background: linear-gradient(135deg, #f0b429, #e08e0b);
+    color: #1a1408;
+  }
+
+  .action-btn.active { border-color: rgba(255,255,255,0.5); }
+
+  .panels {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .window {
+    flex: 1 1 420px;
+    background: #10131f;
+    border: 1px solid #262a3d;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+  }
+
+  .titlebar {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #23273a;
+  }
+
+  .dots { display: flex; gap: 7px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green { background: #28c840; }
+
+  .titlebar .filename {
+    margin-left: auto;
+    font-size: 13px;
+    color: #6b7080;
+  }
+
+  .window-body { padding: 22px 26px 26px; }
+
+  .field { margin-bottom: 18px; }
+
+  .field label {
+    display: block;
+    font-size: 13.5px;
+    color: #b7bacb;
+    margin-bottom: 8px;
+  }
+
+  .field input, .field textarea, .field select {
+    width: 100%;
+    background: #191d2c;
+    border: 1px solid #2c3146;
+    color: #eef0f8;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14.5px;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .field select option { background: #191d2c; color: #eef0f8; }
+
+  .field textarea {
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    font-size: 13.5px;
+    resize: vertical;
+    min-height: 68px;
+    line-height: 1.5;
+  }
+
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: #6c5ce7; }
+
+  /* --- YANGILANGAN TUGMALAR DIZAYNI --- */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .tool-card-btn {
+    background: #191d2c;
+    border: 1px solid #2c3146;
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+    transition: all 0.2s ease;
+    width: 100%;
+  }
+
+  .tool-card-btn:hover {
+    background: #202438;
+    border-color: #6c5ce7;
+    transform: translateY(-1px);
+  }
+
+  .tool-icon {
+    font-size: 20px;
+    width: 38px;
+    height: 38px;
+    background: rgba(108, 92, 231, 0.12);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .tool-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  .tool-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #eef0f8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tool-desc {
+    font-size: 11.5px;
+    color: #8b90a8;
+  }
+
+  /* Test biriktirilgandagi holat */
+  .tool-card-btn.attached {
+    background: rgba(19, 50, 38, 0.5);
+    border-color: #1f5c48;
+  }
+  .tool-card-btn.attached .tool-icon {
+    background: rgba(61, 220, 151, 0.15);
+  }
+  .tool-card-btn.attached .tool-title {
+    color: #3ddc97;
+  }
+
+  .submit-homework-btn {
+    width: 100%;
+    background: #1fb872;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 0;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s ease;
+  }
+  .submit-homework-btn:hover { background: #18a563; }
+
+  /* Supervision styles */
+  .supervision-body { padding: 22px 26px 26px; }
+  .section-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f2f3fa;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-label a {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #8b7cf6;
+    text-decoration: none;
+  }
+  .section-label a:hover { text-decoration: underline; }
+
+  .student-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid #1d2133;
+  }
+  .student-row:last-child { border-bottom: none; }
+
+  .rank-badge {
+    flex: 0 0 26px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #6b7080;
+  }
+  .rank-badge.top1 { color: #ffd452; }
+  .rank-badge.top2 { color: #c9ccd8; }
+  .rank-badge.top3 { color: #d99a5c; }
+
+  .student-name {
+    flex: 1;
+    font-size: 14.5px;
+    color: #eef0f8;
+    font-weight: 500;
+  }
+
+  .badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 13px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .badge.success { background: #133226; border: 1px solid #1f5c48; color: #3ddc97; }
+  .badge.pending { background: #3a2e12; border: 1px solid #6b4f14; color: #f0b429; }
+
+  .alert {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .alert-success { background: #133226; color: #3ddc97; border: 1px solid #1f5c48; }
+
+  .empty-state {
+    padding: 18px 4px;
+    font-size: 13.5px;
+    color: #6b7080;
+    text-align: center;
+  }
+
+  /* --- MODAL STYLES --- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(5, 7, 15, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-window {
+    width: 100%;
+    max-width: 620px;
+    background: #10131f;
+    border: 1px solid #262a3d;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    animation: modalScaleUp 0.2s ease;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @keyframes modalScaleUp {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-body {
+    padding: 24px 28px;
+    overflow-y: auto;
+  }
+
+  .row-2 { display: flex; gap: 16px; }
+  .row-2 .field { flex: 1; }
+
+  .generate-btn {
+    width: 100%;
+    background: #6c5ce7;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 0;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s ease;
+    margin-top: 4px;
+  }
+  .generate-btn:hover { background: #5b4bd6; }
+  .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .modal-attach-btn {
+    width: 100%;
+    background: #1fb872;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 0;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 18px;
+    transition: background 0.15s ease;
+  }
+  .modal-attach-btn:hover { background: #18a563; }
+  .modal-attach-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  #previewBox { margin-top: 20px; display: none; }
+  .preview-title { font-size: 13.5px; color: #b7bacb; margin-bottom: 12px; font-weight: 700; }
+  .q-card { background: #191d2c; border: 1px solid #2c3146; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+  .q-card .q-text { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #eef0f8; }
+  .q-card .q-opt { font-size: 13px; color: #9096ac; padding: 3px 0; }
+  .q-card .q-opt.correct { color: #3ddc97; font-weight: 600; }
+
+  .spinner-row { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 20px 0; color: #8b90a8; font-size: 14px; }
+  .spinner { width: 18px; height: 18px; border: 3px solid #2c3146; border-top-color: #6c5ce7; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13.5px;
+    color: #8b90a8;
+    text-decoration: none;
+  }
+  .back-link:hover { color: #eef0f8; }
+
+  @media (max-width: 900px) {
+    .panels { flex-direction: column; }
+    .navbar { flex-direction: column; align-items: flex-start; }
+    .tools-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- NAVIGATSIYA -->
+  <nav class="navbar">
+    <a href="{% url 'home' %}" class="nav-brand">⚡ FaceMaagic</a>
+    <ul class="nav-links">
+      <li><a href="{% url 'teacher_dashboard' %}" class="active">Dashboard</a></li>
+      <li><a href="{% url 'find_user' %}">Do'st Qidirish</a></li>
+      <li><a href="{% url 'teacher_profile' %}">Profil</a></li>
+      <li><a href="{% url 'chats' %}" class="nav-chat-btn">💬 Chats</a></li>
+    </ul>
+  </nav>
+
+  <div class="header">
+    <h1><span class="icon">&#10010;</span> O'qituvchi Dashboardi: Vazifa Yaratish</h1>
+    <p>teacher_dashboard.html — Uyga vazifa va misol-masalalar qo'shish paneli</p>
+  </div>
+
+  <div class="action-row">
+    <a href="{% url 'create_homework' %}" class="action-btn homework active">
+      <span class="emoji">📝</span> Uyga Vazifa Berish
+    </a>
+    <a href="{% url 'student_rating_help' %}" class="action-btn rating">
+      <span class="emoji">🏆</span> Reyting
+    </a>
+  </div>
+
+  <div class="panels">
+
+    <!-- Add Homework Module -->
+    <div class="window">
+      <div class="titlebar">
+        <div class="dots">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+        <span class="filename">Add Homework Module</span>
+      </div>
+      <div class="window-body">
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        <!-- Forma -->
+        <form method="POST" action="{% url 'create_homework' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- Generatsiya qilingan test savollari shu yerdan backendga ketadi -->
+          <input type="hidden" id="questions_json_main" name="questions_json" value="[]">
+
+          <div class="field">
+            <label for="topic">Mavzu Nomi (Topic)</label>
+            <input type="text" id="topic" name="topic" placeholder="Kvadrat tenglamalar va Viyet teoremasi" required />
+          </div>
+
+          <div class="field">
+            <label for="example">Darslikdan Namuna va Masala (Example &amp; Problem)</label>
+            <textarea id="example" name="description" placeholder="Darslikning 45-sahifasidagi 12, 14 va 15-masalalarni yechish." required></textarea>
+          </div>
+
+          <!-- Yashirin fayl inputi -->
+          <input type="file" id="book_image" name="book_image" accept="image/*" style="display: none;" onchange="updateFileName(this)" />
+
+          <!-- Chiroyli kartochka shaklidagi tugmalar paneli -->
+          <div class="tools-grid">
+            <button type="button" class="tool-card-btn" onclick="document.getElementById('book_image').click();">
+              <div class="tool-icon">📷</div>
+              <div class="tool-info">
+                <span class="tool-title" id="upload-label">Rasm yuklash</span>
+                <span class="tool-desc">Kitobdan rasm biriktirish</span>
+              </div>
+            </button>
+
+            <button type="button" class="tool-card-btn" id="openQuizModalBtn" onclick="openQuizModal()">
+              <div class="tool-icon">✨</div>
+              <div class="tool-info">
+                <span class="tool-title" id="test-label">AI Test</span>
+                <span class="tool-desc">Test generator qo'shish</span>
+              </div>
+            </button>
+          </div>
+
+          <button type="submit" class="submit-homework-btn">
+            <span>✅ Vazifani Saqlash va Tarqatish</span>
+          </button>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Student Supervision / Qisqa Reyting -->
+    <div class="window">
+      <div class="titlebar">
+        <span class="filename" style="margin-left:0; color:#c7cadb;">Student Supervision (Nazorat)</span>
+      </div>
+      <div class="supervision-body">
+        <div class="section-label">
+          <span>Vazifa Bajarilishi — Reyting</span>
+          <a href="{% url 'student_rating_help' %}">To'liq reyting &rarr;</a>
+        </div>
+
+        {% if submissions %}
+          {% for sub in submissions %}
+            <div class="student-row">
+              <span class="rank-badge{% if forloop.counter == 1 %} top1{% elif forloop.counter == 2 %} top2{% elif forloop.counter == 3 %} top3{% endif %}">
+                {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}
+              </span>
+              <span class="student-name">{{ sub.student.get_full_name|default:sub.student.username }}</span>
+              {% if sub.status == 'passed' %}
+                <span class="badge success">{{ sub.score }} ball</span>
+              {% else %}
+                <span class="badge pending">Tekshirilmoqda</span>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            Hozircha ro'yxatdan o'tgan o'quvchilar test topshirmagan.<br>
+            Natijalar paydo bo'lgach, shu yerda avtomatik reyting tarzida ko'rinadi.
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL WINDOW (AI Test generatsiya qilish paneli) -->
+  <div id="quizModal" class="modal-overlay">
+    <div class="modal-window">
+      <div class="titlebar">
+        <div class="dots">
+          <span class="dot red" onclick="closeQuizModal()" style="cursor: pointer;"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+        <span class="filename" style="color: #8b7cf6;">AI Test Generator Modal</span>
+      </div>
+      <div class="modal-body">
+
+        <div class="field">
+          <label for="modalTopicInput">Mavzu / Fan</label>
+          <input type="text" id="modalTopicInput" placeholder="Kvadrat tenglamalar va Viyet teoremasi" />
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label for="difficultySelect">Qiyinchilik darajasi</label>
+            <select id="difficultySelect">
+              <option value="Oson">Oson</option>
+              <option value="O'rtacha" selected>O'rtacha</option>
+              <option value="Qiyin">Qiyin</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="countSelect">Savollar soni</label>
+            <select id="countSelect">
+              <option value="3">3 ta</option>
+              <option value="5" selected>5 ta</option>
+              <option value="10">10 ta</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="button" class="generate-btn" id="generateBtn" onclick="generateQuiz()">
+          &#10024; AI bilan test generatsiya qilish
+        </button>
+
+        <div id="loadingRow" class="spinner-row" style="display:none;">
+          <div class="spinner"></div>
+          <span>AI savollarni tuzmoqda...</span>
+        </div>
+
+        <div id="previewBox">
+          <div class="preview-title">Generatsiya qilingan savollar (tekshirib chiqing):</div>
+          <div id="questionsList"></div>
+        </div>
+
+        <button type="button" class="modal-attach-btn" id="attachBtn" onclick="attachQuizToForm()" disabled>
+          &#9989; Testni Vazifaga Biriktirish
+        </button>
+
+        <a href="#" onclick="closeQuizModal(); return false;" class="back-link">&larr; Bekor qilish / Yopish</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  let generatedQuestions = [];
+
+  function updateFileName(input) {
+    const label = document.getElementById('upload-label');
+    if (input.files && input.files[0]) {
+      let fileName = input.files[0].name;
+      if (fileName.length > 14) {
+        fileName = fileName.substring(0, 14) + '...';
+      }
+      label.textContent = fileName;
+      document.querySelector('.tool-card-btn').classList.add('attached');
+    }
+  }
+
+  // Modal oynani ochish va yopish funksiyalari
+  function openQuizModal() {
+    const mainTopic = document.getElementById('topic').value.trim();
+    if (mainTopic) {
+      document.getElementById('modalTopicInput').value = mainTopic;
+    }
+    document.getElementById('quizModal').style.display = 'flex';
+  }
+
+  function closeQuizModal() {
+    document.getElementById('quizModal').style.display = 'none';
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // AI orqali testlarni olish
+  async function generateQuiz() {
+    const topic = document.getElementById('modalTopicInput').value.trim();
+    if (!topic) {
+      alert("Iltimos, avval mavzu nomini kiriting!");
+      return;
+    }
+
+    const difficulty = document.getElementById('difficultySelect').value;
+    const count = document.getElementById('countSelect').value;
+
+    const generateBtn = document.getElementById('generateBtn');
+    const loadingRow = document.getElementById('loadingRow');
+    const previewBox = document.getElementById('previewBox');
+    const attachBtn = document.getElementById('attachBtn');
+
+    generateBtn.disabled = true;
+    attachBtn.disabled = true;
+    loadingRow.style.display = 'flex';
+    previewBox.style.display = 'none';
+
+    try {
+      const response = await fetch('/api/ai-generate-test/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+          topic: topic,
+          subject: topic,
+          difficulty: difficulty,
+          count: parseInt(count, 10),
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        generatedQuestions = data.questions;
+        renderPreview(generatedQuestions);
+        previewBox.style.display = 'block';
+        attachBtn.disabled = false;
+      } else {
+        alert("Xatolik: " + data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server bilan bog'lanishda xatolik yuz berdi.");
+    } finally {
+      generateBtn.disabled = false;
+      loadingRow.style.display = 'none';
+    }
+  }
+
+  function renderPreview(questions) {
+    const list = document.getElementById('questionsList');
+    list.innerHTML = '';
+
+    questions.keys?.forEach?.(() => {}); // safety helper if needed
+
+    questions.forEach((q, idx) => {
+      const card = document.createElement('div');
+      card.className = 'q-card';
+
+      const qText = document.createElement('div');
+      qText.className = 'q-text';
+      qText.textContent = `${idx + 1}. ${q.question}`;
+      card.appendChild(qText);
+
+      (q.options || []).forEach(opt => {
+        const optEl = document.createElement('div');
+        optEl.className = 'q-opt' + (opt === q.correct_answer ? ' correct' : '');
+        optEl.textContent = opt === q.correct_answer ? `${opt}  ✓` : opt;
+        card.appendChild(optEl);
+      });
+
+      list.appendChild(card);
+    });
+  }
+
+  // Testni asosiy formaga biriktirish
+  function attachQuizToForm() {
+    document.getElementById('questions_json_main').value = JSON.stringify(generatedQuestions);
+
+    // Tugma holatini o'zgartirib, biriktirilganini bildiramiz
+    const testBtn = document.getElementById('openQuizModalBtn');
+    testBtn.classList.add('attached');
+    document.getElementById('test-label').textContent = 'Test biriktirildi';
+
+    closeQuizModal();
+  }
+</script>
+
+</body>
+</html>

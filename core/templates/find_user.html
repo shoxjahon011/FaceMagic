@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Qidiruv va Do'stlik Yuborish</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: radial-gradient(circle at 15% 15%, #1a1830 0%, #0b0e1a 45%, #05070f 100%);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #e7e9f2;
+    padding: 48px 40px;
+  }
+
+  .header { max-width: 1200px; margin: 0 auto 40px; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
+  .header h1 { display: flex; align-items: center; gap: 14px; font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
+  .header h1 .icon { color: #7c6ff0; font-size: 28px; }
+  .header p { margin-top: 10px; color: #8b90a8; font-size: 15px; }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #10131f;
+    border: 1px solid #262a3d;
+    color: #d1d5e5;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .back-btn:hover {
+    background: #191d2c;
+    color: #fff;
+    border-color: #363c54;
+  }
+
+  .panels { max-width: 1200px; margin: 0 auto; display: flex; gap: 32px; flex-wrap: wrap; }
+  .window { flex: 1 1 420px; background: #10131f; border: 1px solid #262a3d; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.45); }
+
+  .titlebar { display: flex; align-items: center; padding: 12px 16px; background: rgba(10, 16, 34, 0.85); border-bottom: 1px solid #23273a; }
+  .dots { display: flex; gap: 7px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green { background: #28c840; }
+  .titlebar .filename { margin-left: auto; font-size: 13px; color: #6b7080; }
+
+  .window-body { padding: 24px; }
+  .search-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .search-input { flex: 1; background: #191d2c; border: 1px solid #2c3146; color: #cfd2e2; border-radius: 10px; padding: 13px 16px; font-size: 14px; outline: none; }
+  .search-input::placeholder { color: #6b7080; }
+  .search-input:focus { border-color: #6c5ce7; }
+
+  .search-btn { background: #6c5ce7; border: none; color: #fff; width: 48px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background 0.15s ease; }
+  .search-btn:hover { background: #5b4bd6; }
+
+  .user-card { display: flex; align-items: center; justify-content: space-between; background: #191d2c; border: 1px solid #2c3146; border-radius: 12px; padding: 14px 16px; gap: 12px; margin-bottom: 12px; }
+  .user-info { display: flex; align-items: center; gap: 12px; }
+
+  .avatar { width: 46px; height: 46px; border-radius: 50%; background: #3aa0e0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; color: #fff; flex-shrink: 0; overflow: hidden; border: 1px solid #3c425c; }
+  .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+
+  .user-name { font-size: 15px; font-weight: 700; color: #f2f3fa; }
+  .user-meta { font-size: 12.5px; color: #7d829a; margin-top: 2px; }
+
+  .card-actions { display: flex; align-items: center; gap: 8px; }
+  .view-btn { display: flex; align-items: center; gap: 6px; background: #252a3d; color: #d1d5e5; border: 1px solid #363c54; border-radius: 8px; padding: 9px 12px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .view-btn:hover { background: #313750; color: #fff; }
+
+  .add-btn { display: flex; align-items: center; gap: 6px; background: #6c5ce7; color: #fff; border: none; border-radius: 8px; padding: 9px 14px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .add-btn:hover { background: #5b4bd6; }
+  .add-btn:disabled { background: #35394d; color: #8b90a8; cursor: default; }
+
+  /* MODAL STYLES */
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 7, 15, 0.88); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+  .modal-card { background: #0c1120; border: 1px solid #262a3d; border-radius: 20px; width: 100%; max-width: 440px; overflow-y: auto; max-height: 90vh; box-shadow: 0 25px 60px rgba(0,0,0,0.6); position: relative; padding: 24px 20px; }
+  .modal-close { position: absolute; top: 16px; right: 16px; background: #191d2c; border: 1px solid #2c3146; color: #8b90a8; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; z-index: 30; }
+  .modal-close:hover { color: #fff; background: #262a3d; }
+
+  .avatar-wrap { position: relative; width: 220px; height: 190px; margin: 10px auto 0; display: flex; align-items: center; justify-content: center; }
+  .avatar-profile { width: 130px; height: 130px; border-radius: 50%; background: #0c1120; display: flex; align-items: center; justify-content: center; position: relative; border: 3px solid rgba(35, 43, 69, 0.8); z-index: 2; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+  .avatar-img-holder { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
+  .avatar-img-holder img { width: 100%; height: 100%; object-fit: cover; }
+
+  .achievements-orbit { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+  .orbit-item { position: absolute; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: auto; cursor: pointer; }
+  .orbit-glow { position: absolute; width: 100%; height: 100%; border-radius: 50%; filter: blur(6px); z-index: -1; opacity: 0.85; }
+  .orbit-icon { width: 36px; height: 36px; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.8)); }
+
+  .rarity-legendary .orbit-glow { background: radial-gradient(circle, #ffd700 0%, rgba(255, 215, 0, 0) 75%); }
+  .rarity-epic .orbit-glow { background: radial-gradient(circle, #a855f7 0%, rgba(168, 85, 247, 0) 75%); }
+  .rarity-rare .orbit-glow { background: radial-gradient(circle, #3b82f6 0%, rgba(59, 130, 246, 0) 75%); }
+  .rarity-common .orbit-glow { background: radial-gradient(circle, #8b93ac 0%, rgba(139, 147, 172, 0) 75%); }
+
+  .pos-1 { top: -8px; left: 15px; } .pos-2 { top: -24px; left: 88px; } .pos-3 { top: -8px; right: 15px; }
+  .pos-4 { top: 38px; left: -10px; } .pos-5 { top: 38px; right: -10px; }
+  .pos-6 { top: 90px; left: -14px; } .pos-7 { top: 90px; right: -14px; }
+
+  .status-dot-profile { position: absolute; bottom: 4px; right: 4px; width: 18px; height: 18px; background: #27c93f; border: 3px solid #131a2e; border-radius: 50%; z-index: 10; }
+
+  .equipped-title-wrap { display: flex; justify-content: center; margin-top: 6px; margin-bottom: 12px; }
+  .equipped-title-badge { display: inline-flex; align-items: center; justify-content: center; padding: 6px 22px; background: linear-gradient(135deg, #e21b2e, #a30f1e); clip-path: polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%); box-shadow: 0 4px 14px rgba(197, 24, 40, 0.45); }
+  .equipped-title-text { font-size: 12px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: #ffffff; }
+
+  .profile-name-modal { text-align: center; font-size: 19px; font-weight: 700; margin: 0 0 2px; color: #fff; }
+  .profile-nickname-modal { text-align: center; font-size: 13.5px; color: #8b7cf6; font-weight: 700; margin: 0 0 4px; }
+  .profile-bio-modal { text-align: center; font-size: 12px; color: #8b90a8; margin: 0 0 10px; font-style: italic; padding: 0 8px; }
+  .profile-id-modal { text-align: center; font-size: 11px; color: #8b90a8; font-family: monospace; margin: 0 0 16px; }
+
+  .stats-grid-modal { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .stat-box-modal { background: rgba(12, 17, 32, 0.6); border: 1px solid rgba(42, 50, 80, 0.6); border-radius: 12px; padding: 10px 12px; }
+  .stat-label-modal { font-size: 10px; color: #8b90a8; text-transform: uppercase; margin-bottom: 3px; }
+  .stat-value-modal { font-size: 13px; font-weight: 700; color: #fff; }
+  .stat-value-modal.green { color: #3ddc84; }
+  .stat-value-modal.orange { color: #f5a623; }
+
+  .section-title-modal { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #8b90a8; margin: 16px 0 8px; display: flex; align-items: center; gap: 8px; }
+  .section-title-modal::before, .section-title-modal::after { content: ""; flex: 1; height: 1px; background: #262a3d; }
+
+  .cert-grid-modal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cert-box-modal { background: rgba(12, 17, 32, 0.6); border: 1px solid rgba(42, 50, 80, 0.6); border-radius: 12px; padding: 10px 6px; text-align: center; }
+  .cert-count-gold { font-size: 15px; font-weight: 800; color: #ffd700; }
+  .cert-count-silver { font-size: 15px; font-weight: 800; color: #c0c5ce; }
+  .cert-count-bronze { font-size: 15px; font-weight: 800; color: #cd7f32; }
+  .cert-label-modal { font-size: 9px; color: #8b90a8; text-transform: uppercase; margin-top: 2px; }
+
+  .iq-card-modal { background: linear-gradient(135deg, rgba(106, 92, 240, 0.15), rgba(139, 124, 246, 0.05)); border: 1px solid rgba(42, 50, 80, 0.6); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+  .iq-value-modal { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #8b7cf6, #6a5cf0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  .requests-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; color: #f2f3fa; }
+  .request-row { display: flex; align-items: center; justify-content: space-between; background: #191d2c; border: 1px solid #2c3146; border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; }
+  .request-user { display: flex; align-items: center; gap: 10px; font-size: 14.5px; font-weight: 600; color: #eef0f8; }
+  .request-actions { display: flex; gap: 8px; }
+
+  .btn-accept, .btn-decline { border: none; border-radius: 8px; padding: 8px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+  .btn-accept { background: #1fb872; color: #fff; }
+  .btn-accept:hover { background: #18a563; }
+  .btn-decline { background: #e5484d; color: #fff; width: 34px; justify-content: center; }
+  .btn-decline:hover { background: #cf3d42; }
+
+  .empty-state { text-align: center; color: #6b7080; font-size: 13.5px; padding: 24px 0; }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-top">
+      <h1><span class="icon">&#128269;</span> Qidiruv va Do'stlik Yuborish</h1>
+      <a href="/home/" class="back-btn">&#8592; Bosh sahifa</a>
+    </div>
+    <p>Nickname, F.I.Sh, ID yoki sinf bo'yicha qidirish hamda do'stlik so'rovlarini boshqarish</p>
+  </div>
+
+  <div class="panels">
+
+    <!-- Qidiruv Oynasi -->
+    <div class="window">
+      <div class="titlebar">
+        <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <span class="filename">find_user.html</span>
+      </div>
+      <div class="window-body">
+
+        <form method="GET" action="" class="search-row">
+          <input class="search-input" name="q" type="text" value="{{ query|default:'' }}" placeholder="Nickname, F.I.Sh, ID, login yoki sinf..." />
+          <button type="submit" class="search-btn">&#128269;</button>
+        </form>
+
+        <!-- Qidiruv Natijalari -->
+        {% if results %}
+          {% for res in results %}
+            {% with u=res.user %}
+              <div class="user-card">
+                <div class="user-info">
+                  <div class="avatar">
+                    {% if u.student_profile and u.student_profile.avatar %}
+                      <img src="{{ u.student_profile.avatar.url }}" alt="{{ u.username }}" class="avatar-img">
+                    {% else %}
+                      {{ u.student_profile.full_name|slice:":2"|upper|default:u.username|slice:":2"|upper }}
+                    {% endif %}
+                  </div>
+                  <div>
+                    <div class="user-name">{% if u.student_profile and u.student_profile.full_name %}{{ u.student_profile.full_name }}{% else %}{{ u.username }}{% endif %}</div>
+                    <div class="user-meta">ID: FM-{{ u.id }} | {{ u.student_profile.classroom|default:"Sinf yo'q" }}</div>
+                  </div>
+                </div>
+
+                <div class="card-actions">
+                  <button class="view-btn" onclick="openModal('modal-{{ u.id }}')">👁️ Profil</button>
+
+                  {% if res.friend_status == 'accepted' %}
+                    <button class="add-btn" disabled style="background: #252a3d; color: #3ddc84;">✓ Do'stlar</button>
+                  {% elif res.friend_status == 'pending' %}
+                    {% if res.is_sender %}
+                      <button class="add-btn" disabled>So'rov yuborilgan</button>
+                    {% else %}
+                      <button class="add-btn" onclick="location.href='{% url 'find_user' %}'">Tasdiqlash kutilmoqda</button>
+                    {% endif %}
+                  {% else %}
+                    <button class="add-btn" id="btn-{{ u.id }}" onclick="sendFriendRequest('{{ u.username }}', 'btn-{{ u.id }}')">&#128100;+ Do'stlashish</button>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- MODAL OYNA -->
+              <div class="modal-overlay" id="modal-{{ u.id }}">
+                <div class="modal-card" onclick="event.stopPropagation()">
+                  <button class="modal-close" onclick="closeModal('modal-{{ u.id }}')">✕</button>
+
+                  <div class="avatar-wrap">
+                    <div class="achievements-orbit">
+                      {% if u.student_profile and u.student_profile.achievements %}
+                        {% for ua in u.student_profile.achievements.all|dictsortreversed:"achievement.rarity"|slice:":7" %}
+                          <div class="orbit-item pos-{{ forloop.counter }} rarity-{{ ua.achievement.rarity }}" title="{{ ua.achievement.name }}">
+                            <div class="orbit-glow"></div>
+                            {% if ua.achievement.icon_image %}
+                              <img src="{{ ua.achievement.icon_image.url }}" alt="Badge" class="orbit-icon">
+                            {% else %}
+                              <span style="font-size: 20px;">🏆</span>
+                            {% endif %}
+                          </div>
+                        {% endfor %}
+                      {% endif %}
+                    </div>
+
+                    <div class="avatar-profile">
+                      <div class="avatar-img-holder">
+                        {% if u.student_profile and u.student_profile.avatar %}
+                          <img src="{{ u.student_profile.avatar.url }}" alt="Avatar">
+                        {% else %}
+                          <span style="font-size: 36px;">👤</span>
+                        {% endif %}
+                      </div>
+                      <span class="status-dot-profile"></span>
+                    </div>
+                  </div>
+
+                  {% if u.student_profile and u.student_profile.equipped_title %}
+                    <div class="equipped-title-wrap">
+                      <div class="equipped-title-badge">
+                        <span class="equipped-title-text">{{ u.student_profile.equipped_title }}</span>
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  <h2 class="profile-name-modal">{% if u.student_profile and u.student_profile.full_name %}{{ u.student_profile.full_name }}{% else %}{{ u.username }}{% endif %}</h2>
+                  <p class="profile-nickname-modal">{{ u.student_profile.nickname|default:"" }}</p>
+
+                  {% if u.student_profile and u.student_profile.bio %}
+                    <p class="profile-bio-modal">"{{ u.student_profile.bio }}"</p>
+                  {% endif %}
+
+                  <p class="profile-id-modal">ID: FM-{{ u.id }}</p>
+
+                  <div class="stats-grid-modal">
+                    <div class="stat-box-modal">
+                      <div class="stat-label-modal">Sinf:</div>
+                      <div class="stat-value-modal">{{ u.student_profile.classroom|default:"Biriktirilmagan" }}</div>
+                    </div>
+                    <div class="stat-box-modal">
+                      <div class="stat-label-modal">Telefon:</div>
+                      <div class="stat-value-modal">{{ u.student_profile.phone|default:"Kiritilmagan" }}</div>
+                    </div>
+                    <div class="stat-box-modal">
+                      <div class="stat-label-modal">Test Reytingi:</div>
+                      <div class="stat-value-modal green">{{ u.student_profile.score|default:"0" }} Ball</div>
+                    </div>
+                    <div class="stat-box-modal">
+                      <div class="stat-label-modal">Yillik Ball:</div>
+                      <div class="stat-value-modal orange">{{ u.student_profile.yearly_score|default:"0" }} Ball</div>
+                    </div>
+                  </div>
+
+                  <div class="section-title-modal">Sertifikatlar</div>
+                  <div class="cert-grid-modal">
+                    <div class="cert-box-modal">
+                      <div style="font-size: 16px;">🥇</div>
+                      <div class="cert-count-gold">{{ u.student_profile.gold_certificates|default:"0" }}</div>
+                      <div class="cert-label-modal">Oltin</div>
+                    </div>
+                    <div class="cert-box-modal">
+                      <div style="font-size: 16px;">🥈</div>
+                      <div class="cert-count-silver">{{ u.student_profile.silver_certificates|default:"0" }}</div>
+                      <div class="cert-label-modal">Kumush</div>
+                    </div>
+                    <div class="cert-box-modal">
+                      <div style="font-size: 16px;">🥉</div>
+                      <div class="cert-count-bronze">{{ u.student_profile.bronze_certificates|default:"0" }}</div>
+                      <div class="cert-label-modal">Bronza</div>
+                    </div>
+                  </div>
+
+                  <div class="section-title-modal">IQ Darajasi</div>
+                  <div class="iq-card-modal">
+                    <div>
+                      <div style="font-size: 10px; color: #8b90a8; text-transform: uppercase;">Ball</div>
+                      <div class="iq-value-modal">{{ u.student_profile.iq_score|default:"—" }}</div>
+                    </div>
+                    <div style="font-size: 12px; color: #8b90a8;">🧠</div>
+                  </div>
+                </div>
+              </div>
+            {% endwith %}
+          {% endfor %}
+
+        {% elif query %}
+          <div class="empty-state">Foydalanuvchi topilmadi.</div>
+        {% else %}
+          <div class="empty-state">Qidirish uchun ma'lumot kiriting.</div>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <!-- Kelgan So'rovlar Paneli -->
+    <div class="window">
+      <div class="titlebar">
+        <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <span class="filename">friend_requests.html</span>
+      </div>
+      <div class="window-body">
+        <div class="requests-title">📩 Kelgan So'rovlar ({{ pending_requests|length }})</div>
+        <div id="requestsList">
+          {% for req in pending_requests %}
+            <div class="request-row" data-id="{{ req.id }}">
+              <div class="request-user">
+                <div class="avatar" style="width:30px; height:30px; font-size:12px;">
+                  {% if req.from_user.student_profile and req.from_user.student_profile.avatar %}
+                    <img src="{{ req.from_user.student_profile.avatar.url }}" alt="avatar" class="avatar-img">
+                  {% else %}
+                    👤
+                  {% endif %}
+                </div>
+                {% if req.from_user.student_profile and req.from_user.student_profile.full_name %}{{ req.from_user.student_profile.full_name }}{% else %}{{ req.from_user.username }}{% endif %}
+              </div>
+              <div class="request-actions">
+                <button class="btn-accept" onclick="respondFriendRequest({{ req.id }}, 'accept')">✓ Qabul</button>
+                <button class="btn-decline" onclick="respondFriendRequest({{ req.id }}, 'reject')">✕</button>
+              </div>
+            </div>
+          {% empty %}
+            <div class="empty-state">Hozircha yangi so'rovlar yo'q</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) modal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal-overlay')) {
+        event.target.style.display = 'none';
+      }
+    };
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    async function sendFriendRequest(toUsername, btnId) {
+      const btn = document.getElementById(btnId);
+      if(btn) btn.disabled = true;
+
+      try {
+        const response = await fetch('/api/send-friend-request/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ to_username: toUsername })
+        });
+
+        const data = await response.json();
+        if (data.status === 'success') {
+          if(btn) btn.textContent = '✓ So\'rov yuborildi';
+        } else {
+          alert('Xatolik: ' + data.message);
+          if(btn) btn.disabled = false;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Serverga ulanishda xatolik');
+        if(btn) btn.disabled = false;
+      }
+    }
+
+    async function respondFriendRequest(requestId, action) {
+      try {
+        const response = await fetch('/api/respond-friend-request/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ request_id: requestId, action: action })
+        });
+
+        const data = await response.json();
+        if (data.status === 'success') {
+          const row = document.querySelector(`[data-id="${requestId}"]`);
+          if (row) row.remove();
+          setTimeout(() => location.reload(), 300);
+        } else {
+          alert('Xatolik: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+  </script>
+</body>
+</html>

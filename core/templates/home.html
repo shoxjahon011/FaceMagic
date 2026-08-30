@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FaceMaagic - Asosiy Menyu</title>
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- PDF Yaratish uchun jsPDF Kutubxonasi (AI test sertifikatini yuklab olish uchun) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #121829;
+      --card-header: #171e33;
+      --border: #232d48;
+      --border-hover: #3b4870;
+      --text: #f3f4f8;
+      --text-muted: #8e97b0;
+
+      --accent: #6a5cf0;
+      --accent-glow: rgba(106, 92, 240, 0.25);
+
+      --green: #22c98a;
+      --green-glow: rgba(34, 201, 138, 0.2);
+
+      --orange: #f5a623;
+      --orange-glow: rgba(245, 166, 35, 0.15);
+
+      --gold: #f1c40f;
+
+      --red-dot: #ff5f56;
+      --yellow-dot: #ffbd2e;
+      --green-dot: #27c93f;
+
+      --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top center, #161f38 0%, var(--bg) 100%);
+      font-family: var(--font);
+      color: var(--text);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .window {
+      width: 100%;
+      max-width: 960px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    .window-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: var(--card-header);
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .window-dots { display: flex; gap: 8px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .dot.red { background: var(--red-dot); }
+    .dot.yellow { background: var(--yellow-dot); }
+    .dot.green { background: var(--green-dot); }
+
+    .bar-left, .bar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bar-title-wrap {
+      flex: 1;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .online-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(245, 166, 35, 0.4);
+      color: var(--orange);
+      background: var(--orange-glow);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 30px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .online-badge:hover {
+      background: rgba(245, 166, 35, 0.25);
+      border-color: var(--orange);
+      transform: translateY(-1px);
+    }
+
+    .achievement-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      background: linear-gradient(135deg, #ffe066, var(--gold));
+      color: #121829;
+      border: none;
+      border-radius: 30px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(241, 196, 15, 0.25);
+    }
+
+    .achievement-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(241, 196, 15, 0.4);
+    }
+
+    .achievement-badge {
+      background: rgba(18, 24, 41, 0.15);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #8b7cf6, var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px var(--accent-glow);
+      overflow: hidden;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .user-avatar:hover {
+      transform: scale(1.08);
+      box-shadow: 0 4px 15px var(--accent-glow);
+      border-color: var(--accent);
+    }
+
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-avatar svg { width: 18px; height: 18px; }
+
+    .invites-container {
+      width: 100%;
+      max-width: 960px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pubg-invite-card {
+      background: #101424;
+      border: 1.5px solid var(--green);
+      border-radius: 14px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 0 20px var(--green-glow);
+      animation: pulseBorder 2s infinite alternate;
+    }
+
+    @keyframes pulseBorder {
+      0% { box-shadow: 0 0 10px rgba(34, 201, 138, 0.2); }
+      100% { box-shadow: 0 0 25px rgba(34, 201, 138, 0.5); }
+    }
+
+    .pubg-invite-card .invite-text {
+      font-size: 14.5px;
+      color: #e7e9f2;
+    }
+
+    .pubg-invite-card .invite-text strong {
+      color: #38b6e8;
+    }
+
+    .invite-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-action-mini {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-action-mini.accept { background: var(--green); }
+    .btn-action-mini.accept:hover { background: #1cb078; transform: scale(1.1); }
+    .btn-action-mini.reject { background: var(--red-dot); }
+    .btn-action-mini.reject:hover { background: #e04b42; transform: scale(1.1); }
+
+    .group-banner {
+      width: 100%;
+      max-width: 960px;
+      margin-bottom: 20px;
+      background: rgba(106, 92, 240, 0.12);
+      border: 1px solid var(--accent);
+      border-radius: 14px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .group-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .group-members {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14.5px;
+      font-weight: 600;
+    }
+
+    .group-members .badge-tag {
+      background: var(--accent);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .window-body {
+      padding: 28px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .menu-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .menu-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: transparent;
+      transition: background 0.3s;
+    }
+
+    .menu-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .menu-card.ai-card:hover::before { background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
+    .menu-card.find-card:hover::before { background: linear-gradient(90deg, var(--accent), #a855f7); }
+    .menu-card.study-card:hover::before { background: linear-gradient(90deg, #10b981, var(--green)); }
+    .menu-card.test-card:hover::before { background: linear-gradient(90deg, #f5a623, #f1c40f); }
+
+    .card-header-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .menu-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .menu-icon.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    .menu-icon.purple { background: linear-gradient(135deg, #8b5cf6, var(--accent)); }
+    .menu-icon.green { background: linear-gradient(135deg, #10b981, #047857); }
+    .menu-icon.orange { background: linear-gradient(135deg, #f5a623, #d35400); }
+
+    .menu-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+      color: #fff;
+    }
+
+    .menu-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .menu-footer {
+      margin-top: auto;
+      padding-top: 8px;
+    }
+
+    .menu-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+
+    .menu-tag.blue { color: #60a5fa; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); }
+    .menu-tag.purple { color: #a78bfa; background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.3); }
+    .menu-tag.green { color: var(--green); background: var(--green-glow); border: 1px solid rgba(34, 201, 138, 0.3); }
+    .menu-tag.orange { color: var(--orange); background: var(--orange-glow); border: 1px solid rgba(245, 166, 35, 0.3); }
+
+    /* AI CHAT MODAL STYLES */
+    .chat-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(5, 8, 16, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .chat-modal {
+      width: 100%;
+      max-width: 920px;
+      height: 85vh;
+      max-height: 700px;
+      background: #111625;
+      border: 1px solid var(--border-hover);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+      animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalFadeIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .chat-header {
+      padding: 14px 20px;
+      background: var(--card-header);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .chat-header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .chat-header-title .icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mode-select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #0b0f19;
+      padding: 4px 8px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .mode-select-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .mode-select {
+      background: transparent;
+      color: #22c98a;
+      border: none;
+      font-size: 12px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .mode-select option {
+      background: #111625;
+      color: #fff;
+    }
+
+    .close-chat-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-chat-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .chat-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .chat-sidebar {
+      width: 250px;
+      background: #0d121f;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
+    .new-chat-btn {
+      background: #182035;
+      color: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .new-chat-btn:hover { background: var(--border-hover); }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-top: 10px;
+      text-transform: uppercase;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      padding: 8px 10px;
+      font-size: 13px;
+      color: #cbd5e1;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item:hover, .history-item.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #111625;
+      position: relative;
+    }
+
+    .chat-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .chat-message-wrapper {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+      position: relative;
+    }
+
+    .chat-message-wrapper.user { align-self: flex-end; align-items: flex-end; }
+    .chat-message-wrapper.ai { align-self: flex-start; align-items: flex-start; }
+
+    .reply-quote-box {
+      background: rgba(255, 255, 255, 0.07);
+      border-left: 3px solid var(--accent);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      color: #a0aec0;
+      margin-bottom: 4px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chat-message {
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      position: relative;
+      width: 100%;
+    }
+
+    .chat-message.user { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+    .chat-message.ai { background: #182035; color: #e2e8f0; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+
+    .chat-message .media-preview img,
+    .chat-message .media-preview video {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 6px;
+    }
+
+    .reply-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      opacity: 0.6;
+      margin-top: 2px;
+    }
+
+    .reply-btn:hover { opacity: 1; color: #fff; }
+
+    .reply-preview-bar {
+      display: none;
+      background: #171e33;
+      padding: 8px 16px;
+      border-top: 1px solid var(--border);
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+
+    .reply-preview-bar span { color: var(--accent); font-weight: bold; }
+    .cancel-reply-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; }
+
+    .chat-footer {
+      padding: 14px 20px;
+      background: var(--card-header);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .chat-input-row { display: flex; gap: 10px; align-items: center; }
+
+    .file-upload-btn {
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 12px;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .file-upload-btn:hover { border-color: var(--accent); color: #fff; }
+
+    .chat-input {
+      flex: 1;
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .chat-input:focus { border-color: var(--accent); }
+
+    .send-chat-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      padding: 0 18px;
+      height: 42px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .send-chat-btn:hover { opacity: 0.9; }
+
+    .media-preview-container { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .preview-thumb {
+      position: relative;
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--accent);
+    }
+
+    .preview-thumb img, .preview-thumb video { width: 100%; height: 100%; object-fit: cover; }
+
+    .remove-thumb-btn {
+      position: absolute;
+      top: 2px; right: 2px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      font-size: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* AI TEST MODAL & UI STYLES */
+    .modal {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(5, 8, 16, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+      backdrop-filter: blur(8px);
+      padding: 15px;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border-hover);
+      padding: 35px;
+      border-radius: 20px;
+      width: 96%;
+      max-width: 960px;
+      height: 90vh;
+      max-height: 850px;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+      position: relative;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    .close-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.15); }
+
+    .select-subject {
+      width: 100%;
+      padding: 12px 14px;
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      color: #fff;
+      border-radius: 12px;
+      outline: none;
+      font-size: 14.5px;
+    }
+    .select-subject:focus { border-color: var(--orange); }
+
+    .btn-test {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #f5a623, #d35400);
+      border: none;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 14px;
+      box-shadow: 0 4px 18px rgba(245, 166, 35, 0.35);
+    }
+    .btn-test:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .btn-secondary-test {
+      width: 100%;
+      padding: 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 12px;
+    }
+    .btn-secondary-test:hover { border-color: var(--border-hover); }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      padding: 14px 18px;
+      margin: 10px 0;
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      color: #fff;
+      border-radius: 12px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .option-btn:hover { border-color: var(--orange); background: rgba(245, 166, 35, 0.05); }
+
+    #certCanvas {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 52vh;
+      object-fit: contain;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-top: 10px;
+    }
+
+    @media (max-width: 680px) {
+      .window-bar { flex-direction: column; align-items: flex-start; }
+      .bar-title-wrap { display: none; }
+      .bar-right { width: 100%; justify-content: space-between; }
+      .pubg-invite-card, .group-banner { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .chat-sidebar { display: none; }
+      .modal-content { width: 100%; height: 95vh; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PUBG TAKLIFLAR PANELI -->
+  <div class="invites-container">
+    {% for invite in pending_invites %}
+      <div class="pubg-invite-card" id="invite-card-{{ invite.id }}">
+        <div class="invite-text">
+          ⚡ <strong>{{ invite.sender.student_profile.nickname|default:invite.sender.username }}</strong> sizni birgalikda o'rganish guruhiga taklif qilmoqda!
+        </div>
+        <div class="invite-actions">
+          <button type="button" class="btn-action-mini accept" onclick="respondInvite({{ invite.id }}, 'accept')" title="Qabul qilish">✔</button>
+          <button type="button" class="btn-action-mini reject" onclick="respondInvite({{ invite.id }}, 'reject')" title="Rad etish">✖</button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- FAOL GURUH BANNERI -->
+  {% if active_group %}
+    <div class="group-banner">
+      <div class="group-title">⚡ Faol Guruh</div>
+      <div class="group-members">
+        <span>🎮 {{ active_group.sender.student_profile.nickname }}</span>
+        <span class="badge-tag">VS / TEAM</span>
+        <span>🎮 {{ active_group.receiver.student_profile.nickname }}</span>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- MAIN WINDOW -->
+  <div class="window">
+    <div class="window-bar">
+      <div class="bar-left">
+        <div class="window-dots">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+      </div>
+
+      <div class="bar-title-wrap">FaceMaagic — Asosiy Menyu</div>
+
+      <div class="bar-right">
+        <div class="online-badge" onclick="window.location.href='{% url 'chats' %}'">
+          <span>⚡</span> Chatlar
+        </div>
+
+        <a href="{% url 'achievements' %}" class="achievement-btn">
+          🏆 <span class="achievement-badge">{{ user_achievements_count|default:"0" }}/100</span>
+        </a>
+
+        <div class="user-avatar" title="Profilga o'tish" onclick="window.location.href='{% url 'student_profile' %}'">
+          {% if user.student_profile.avatar %}
+            <img src="{{ user.student_profile.avatar.url }}" alt="{{ user.username }}">
+          {% else %}
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="8" r="4" fill="white"/>
+              <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- CARDS -->
+    <div class="window-body">
+
+      <!-- AI Card (MaagicAI Chat) -->
+      <div class="menu-card ai-card" onclick="openChatModal()">
+        <div class="card-header-content">
+          <div class="menu-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM12 16a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2zM4 10a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 10a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2z" fill="white"/>
+              <circle cx="12" cy="12" r="3" fill="white"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="menu-title">MaagicAI</h2>
+            <p class="menu-desc">Sizning aqlli yordamchingiz bilan suhbatlashing.</p>
+          </div>
+        </div>
+        <div class="menu-footer">
+          <span class="menu-tag blue">💡 Mavzularni o'rganish uchun</span>
+        </div>
+      </div>
+
+      <!-- AI Test Card -->
+      <div class="menu-card test-card" onclick="openTestModal()">
+        <div class="card-header-content">
+          <div class="menu-icon orange">
+            <i class="fa-solid fa-trophy" style="font-size: 22px; color: #fff;"></i>
+          </div>
+          <div>
+            <h2 class="menu-title">AI Test Musobaqasi</h2>
+            <p class="menu-desc">Sun'iy intellekt yordamida bilimingizni sinang va sertifikat oling!</p>
+          </div>
+        </div>
+        <div class="menu-footer">
+          <span class="menu-tag orange">🏆 Bilimni sinash & Sertifikat</span>
+        </div>
+      </div>
+
+      <!-- Find User -->
+      <div class="menu-card find-card" onclick="window.location.href='{% url 'find_user' %}'">
+        <div class="card-header-content">
+          <div class="menu-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="9" cy="8" r="4" fill="white"/>
+              <path d="M2 20c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+              <path d="M19 8v6M16 11h6" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="menu-title">Foydalanuvchi qidirish</h2>
+            <p class="menu-desc">Do'stlaringizni ID yoki ismi bo'yicha toping.</p>
+          </div>
+        </div>
+        <div class="menu-footer">
+          <span class="menu-tag purple">🔍 Do'stlar ortirish</span>
+        </div>
+      </div>
+
+      <!-- Voice Room -->
+      <div class="menu-card study-card" onclick="window.location.href='{% url 'voice_room' %}'">
+        <div class="card-header-content">
+          <div class="menu-icon green">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="5" width="20" height="14" rx="3" stroke="white" stroke-width="2"/>
+              <circle cx="9" cy="11" r="2" fill="white"/>
+              <path d="M5 16c0-1.7 1.8-3 4-3s4 1.3 4 3" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M15 10h4M15 13h3" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="menu-title">Birgalikda o'rganish</h2>
+            <p class="menu-desc">Real-vaqtda uy vazifalari va testlarni birga yeching.</p>
+          </div>
+        </div>
+        <div class="menu-footer">
+          <span class="menu-tag green">🎙️ Ovozli xonalar</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GEMINI AI CHAT MODAL -->
+  <div class="chat-modal-overlay" id="chatModalOverlay">
+    <div class="chat-modal">
+      <div class="chat-header">
+        <div class="chat-header-title">
+          <div class="icon">✨</div>
+          <span>MaagicAI Assistent</span>
+        </div>
+
+        <!-- MODE SELECTOR -->
+        <div class="mode-select-wrap">
+          <span class="mode-select-label">Rejim:</span>
+          <select id="aiModeSelect" class="mode-select" onchange="handleModeChange(this)">
+            <option value="50" selected>50% (Do'stona)</option>
+            <option value="100">100% (100% ochiq tabiat)</option>
+            <option value="25">25% (Rasmiy)</option>
+          </select>
+        </div>
+
+        <button class="close-chat-btn" onclick="closeChatModal()">✖</button>
+      </div>
+
+      <div class="chat-container">
+        <!-- SIDEBAR -->
+        <div class="chat-sidebar">
+          <button class="new-chat-btn" onclick="createNewChat()">✏️ Yangi chat</button>
+
+          <div class="sidebar-section-title">Yaqindagi chatlar</div>
+          <div class="history-list" id="historyList"></div>
+        </div>
+
+        <!-- MAIN CHAT AREA -->
+        <div class="chat-main">
+          <div class="chat-body" id="chatBody">
+            <div class="chat-message-wrapper ai" id="msg-init">
+              <div class="chat-message ai">
+                Nima gap? Qisqa va londa qilib so'rayver.
+              </div>
+              <button class="reply-btn" onclick="setReplyTarget('msg-init', 'AI', 'Nima gap? Qisqa va londa qilib so\'rayver.')">↩ Javob berish</button>
+            </div>
+          </div>
+
+          <!-- REPLY BAR PREVIEW -->
+          <div class="reply-preview-bar" id="replyPreviewBar">
+            <div>Javob berilmoqda: <span id="replyTargetAuthor">AI</span> — "<i id="replyTargetText">...</i>"</div>
+            <button class="cancel-reply-btn" onclick="cancelReply()">✖</button>
+          </div>
+
+          <!-- FOOTER & INPUT -->
+          <div class="chat-footer">
+            <div class="media-preview-container" id="mediaPreviewContainer"></div>
+
+            <div class="chat-input-row">
+              <label class="file-upload-btn" title="Rasm yoki Video biriktirish">
+                📎
+                <input type="file" id="chatFileInput" accept="image/*,video/*" multiple style="display: none;" onchange="handleFileSelect(event)">
+              </label>
+
+              <input type="text" id="chatInput" class="chat-input" placeholder="Savolingizni yozing..." onkeypress="handleKeyPress(event)">
+              <button class="send-chat-btn" onclick="sendChatMessage()">Yuborish</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI TEST MODAL OYNASI -->
+  <div class="modal" id="testModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal('testModal')">&times;</button>
+
+        <!-- Step 1: Sozlamalar -->
+        <div id="quizSetup">
+            <h2 style="margin-bottom: 20px; font-size:22px;"><i class="fa-solid fa-sliders"></i> Test Sozlamalari</h2>
+
+            <div style="margin-bottom: 16px;">
+                <label style="color:var(--text-muted); font-size:12px; text-transform:uppercase; font-weight:600;">Fanni tanlang:</label>
+                <select id="subjectSelect" class="select-subject">
+                    <option value="Matematika">Matematika</option>
+                    <option value="Ona tili">Ona tili</option>
+                    <option value="Fizika">Fizika</option>
+                    <option value="Python va Django">Python va Django</option>
+                    <option value="Ingliz tili">Ingliz tili</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="color:var(--text-muted); font-size:12px; text-transform:uppercase; font-weight:600;">Qiyinchilik darajasi:</label>
+                <select id="difficultySelect" class="select-subject">
+                    <option value="Oson">Oson</option>
+                    <option value="O'rtacha" selected>O'rtacha</option>
+                    <option value="Qiyin">Qiyin (Musobaqa rejimi)</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:16px; margin-bottom: 24px;">
+                <div style="flex:1;">
+                    <label style="color:var(--text-muted); font-size:12px; text-transform:uppercase; font-weight:600;">Savollar soni:</label>
+                    <select id="countSelect" class="select-subject" onchange="toggleCustomCount()">
+                        <option value="3">3 ta</option>
+                        <option value="5" selected>5 ta</option>
+                        <option value="10">10 ta</option>
+                        <option value="custom">Boshqa</option>
+                    </select>
+                    <input type="number" id="customCountInput" class="select-subject"
+                           style="display:none; margin-top:8px;"
+                           placeholder="Sonini kiriting" min="1" max="50" value="5">
+                </div>
+                <div style="flex:1;">
+                    <label style="color:var(--text-muted); font-size:12px; text-transform:uppercase; font-weight:600;">Vaqt (har biriga):</label>
+                    <select id="timeSelect" class="select-subject" onchange="toggleCustomTime()">
+                        <option value="15">15 soniya</option>
+                        <option value="30" selected>30 soniya</option>
+                        <option value="60">1 daqiqa</option>
+                        <option value="custom">Boshqa</option>
+                    </select>
+                    <input type="number" id="customTimeInput" class="select-subject"
+                           style="display:none; margin-top:8px;"
+                           placeholder="Soniyada" min="5" max="600" value="30">
+                </div>
+            </div>
+
+            <button class="btn-test" onclick="startAITest()">
+                <i class="fa-solid fa-play"></i> Testni Boshlash
+            </button>
+        </div>
+
+        <!-- Step 2: Test savollari -->
+        <div id="quizBox" style="display: none; flex:1; display:flex; flex-direction:column; justify-content:center;"></div>
+
+        <!-- Step 3: Natija va Sertifikat -->
+        <div id="quizResult" style="display: none; text-align: center; flex:1; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+                <h2 id="resultTitle" style="color:var(--green); margin-bottom: 6px; font-size:22px;"><i class="fa-solid fa-trophy"></i> Tabriklaymiz!</h2>
+                <p id="resultText" style="margin-bottom: 10px; color:var(--text-muted); font-size:15px;"></p>
+            </div>
+
+            <div style="position:relative; cursor: zoom-in;" onclick="openCertFullscreen()" title="Kattalashtirib ko'rish">
+                <canvas id="certCanvas" width="800" height="500"></canvas>
+                <div style="position:absolute; bottom:8px; right:8px; background:rgba(11,15,25,0.85); color:#fff; font-size:12px; padding:6px 12px; border-radius:20px; display:flex; align-items:center; gap:6px; pointer-events:none;">
+                    <i class="fa-solid fa-expand"></i> Kattalashtirish
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 10px;">
+                <button class="btn-secondary-test" style="margin-top:0;" onclick="openReviewMode()">
+                    <i class="fa-solid fa-list-check"></i> Javoblarni Ko'rish
+                </button>
+                <button class="btn-test" style="margin-top:0;" onclick="downloadCertificatePDF()">
+                    <i class="fa-solid fa-file-pdf"></i> PDF yuklab olish
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 4: Javoblarni ko'rib chiqish -->
+        <div id="reviewBox" style="display: none; flex:1; display:flex; flex-direction:column; justify-content:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                <span id="reviewQuestionNum" style="color:var(--orange); font-weight:bold; font-size:15px;"></span>
+            </div>
+            <h3 id="reviewQuestionText" style="margin-bottom: 18px; font-size:18px;"></h3>
+            <div id="reviewOptionsContainer"></div>
+            <button class="btn-test" id="reviewNextBtn" onclick="nextReviewQuestion()">
+                Keyingi <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+  </div>
+
+  <!-- SERTIFIKAT FULLSCREEN KO'RISH OYNASI -->
+  <div id="certFullscreenOverlay" onclick="closeCertFullscreen(event)" style="
+        display:none; position:fixed; inset:0; z-index:2000;
+        background:rgba(3,5,10,0.94); backdrop-filter: blur(6px);
+        align-items:center; justify-content:center; padding:24px; cursor: zoom-out;">
+    <button onclick="closeCertFullscreen(event)" style="
+          position:absolute; top:20px; right:24px; background:rgba(255,255,255,0.08);
+          border:1px solid rgba(255,255,255,0.2); color:#fff; width:42px; height:42px;
+          border-radius:50%; font-size:20px; cursor:pointer; display:flex;
+          align-items:center; justify-content:center; z-index:2001;">✖</button>
+
+    <img id="certFullscreenImg" src="" alt="Sertifikat"
+         style="max-width:92vw; max-height:86vh; object-fit:contain; border-radius:12px;
+                box-shadow: 0 30px 90px rgba(0,0,0,0.8); cursor:auto;"
+         onclick="event.stopPropagation()">
+
+    <button onclick="event.stopPropagation(); downloadCertificatePDF();" style="
+          position:absolute; bottom:22px; left:50%; transform:translateX(-50%);
+          background:linear-gradient(135deg, #f5a623, #d35400); border:none; color:#fff;
+          font-weight:700; padding:13px 28px; border-radius:30px; cursor:pointer;
+          font-size:15px; box-shadow:0 8px 22px rgba(245,166,35,0.35); display:flex;
+          align-items:center; gap:8px; z-index:2001;">
+      <i class="fa-solid fa-file-pdf"></i> PDF formatida yuklab olish
+    </button>
+  </div>
+
+  <script>
+    let previousMode = '50';
+    let selectedFiles = [];
+    let currentReplyTarget = null;
+    let currentSessionId = null;
+
+    let currentQuestions = [];
+    let currentIdx = 0;
+    let score = 0;
+    let timerInterval = null;
+    let perQuestionTime = 30;
+    let timeLeft = 30;
+    let selectedSubjectName = "Matematika";
+    let userAnswers = [];
+    let reviewIdx = 0;
+    let currentCertTier = "Oltin";
+
+    const CERT_TEMPLATES = {
+        "Ishtirokchi": "{% static 'certificates/ishtirokchi.jpg' %}",
+        "Bronza": "{% static 'certificates/bronza.jpg' %}",
+        "Kumush": "{% static 'certificates/kumush.jpg' %}",
+        "Oltin": "{% static 'certificates/oltin.jpg' %}"
+    };
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    function respondInvite(inviteId, action) {
+      const card = document.getElementById(`invite-card-${inviteId}`);
+
+      fetch(`/respond-invite/${inviteId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=${action}`
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'accepted' || data.status === 'rejected') {
+          card.remove();
+          location.reload();
+        }
+      })
+      .catch(err => {
+        console.error('Xatolik yuz berdi:', err);
+      });
+    }
+
+    function openChatModal() {
+      document.getElementById('chatModalOverlay').style.display = 'flex';
+      document.getElementById('chatInput').focus();
+    }
+
+    function closeChatModal() {
+      document.getElementById('chatModalOverlay').style.display = 'none';
+    }
+
+    function openTestModal() {
+        document.getElementById('quizSetup').style.display = 'block';
+        document.getElementById('quizBox').style.display = 'none';
+        document.getElementById('quizResult').style.display = 'none';
+        document.getElementById('reviewBox').style.display = 'none';
+        document.getElementById('testModal').style.display = 'flex';
+    }
+
+    function closeModal(id) {
+        if (id === 'testModal') clearInterval(timerInterval);
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function toggleCustomCount() {
+        const select = document.getElementById('countSelect');
+        const customInput = document.getElementById('customCountInput');
+        customInput.style.display = (select.value === 'custom') ? 'block' : 'none';
+    }
+
+    function getSelectedCount() {
+        const select = document.getElementById('countSelect');
+        if (select.value === 'custom') {
+            let val = parseInt(document.getElementById('customCountInput').value);
+            return (isNaN(val) || val < 1) ? 1 : (val > 50 ? 50 : val);
+        }
+        return parseInt(select.value);
+    }
+
+    function toggleCustomTime() {
+        const select = document.getElementById('timeSelect');
+        const customInput = document.getElementById('customTimeInput');
+        customInput.style.display = (select.value === 'custom') ? 'block' : 'none';
+    }
+
+    function getSelectedTime() {
+        const select = document.getElementById('timeSelect');
+        if (select.value === 'custom') {
+            let val = parseInt(document.getElementById('customTimeInput').value);
+            return (isNaN(val) || val < 5) ? 5 : (val > 600 ? 600 : val);
+        }
+        return parseInt(select.value);
+    }
+
+    async function startAITest() {
+        const subjectSelect = document.getElementById('subjectSelect');
+        selectedSubjectName = subjectSelect ? subjectSelect.value : "Matematika";
+
+        const difficulty = document.getElementById('difficultySelect').value;
+        const count = getSelectedCount();
+        perQuestionTime = getSelectedTime();
+
+        document.getElementById('quizSetup').style.display = 'none';
+
+        const quizBox = document.getElementById('quizBox');
+        quizBox.style.display = 'flex';
+        quizBox.innerHTML = `
+            <div style="text-align:center; padding:3rem;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:3rem; color:var(--orange);"></i>
+                <h3 style="margin-top:1.2rem; font-size:18px;">AI test tuzmoqda...</h3>
+            </div>`;
+
+        try {
+            const response = await fetch('/api/ai-generate-test/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    topic: selectedSubjectName,
+                    subject: selectedSubjectName,
+                    difficulty: difficulty,
+                    count: count,
+                    time_limit: perQuestionTime
+                })
+            });
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                currentQuestions = data.questions;
+                currentIdx = 0;
+                score = 0;
+                userAnswers = new Array(currentQuestions.length).fill(null);
+
+                quizBox.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                        <span id="questionNum" style="color:var(--orange); font-weight:bold; font-size:15px;">Savol 1/${currentQuestions.length}</span>
+                        <span id="quizTimer" style="color:var(--orange); font-weight:bold; font-size:15px;"><i class="fa-solid fa-clock"></i> 00:${perQuestionTime}</span>
+                    </div>
+                    <h3 id="questionText" style="margin: 12px 0 20px 0; font-size:18px;"></h3>
+                    <div id="optionsContainer"></div>
+                `;
+
+                showQuestion(currentIdx);
+            } else {
+                alert("Xatolik: " + (data.message || "Noma'lum xatolik"));
+                document.getElementById('quizSetup').style.display = 'block';
+                quizBox.style.display = 'none';
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Server bilan bog'lanishda xatolik yuz berdi.");
+            document.getElementById('quizSetup').style.display = 'block';
+            quizBox.style.display = 'none';
+        }
+    }
+
+    function showQuestion(index) {
+        if (index >= currentQuestions.length) {
+            finishQuiz();
+            return;
+        }
+
+        clearInterval(timerInterval);
+        timeLeft = perQuestionTime;
+        startTimer();
+
+        const q = currentQuestions[index];
+        document.getElementById('questionNum').innerText = `Savol ${index + 1}/${currentQuestions.length}`;
+        document.getElementById('questionText').innerText = q.question;
+
+        const container = document.getElementById('optionsContainer');
+        container.innerHTML = '';
+
+        q.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => selectOption(opt, q.correct_answer, index);
+            container.appendChild(btn);
+        });
+    }
+
+    function startTimer() {
+        updateTimerUI();
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerUI();
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                userAnswers[currentIdx] = null;
+                currentIdx++;
+                showQuestion(currentIdx);
+            }
+        }, 1000);
+    }
+
+    function updateTimerUI() {
+        const timerElem = document.getElementById('quizTimer');
+        if (!timerElem) return;
+        const sec = timeLeft < 10 ? `0${timeLeft}` : timeLeft;
+        timerElem.innerHTML = `<i class="fa-solid fa-clock"></i> 00:${sec}`;
+        timerElem.style.color = (timeLeft <= 5) ? '#ff5f56' : 'var(--orange)';
+    }
+
+    function selectOption(selected, correct, index) {
+        clearInterval(timerInterval);
+        userAnswers[index] = selected;
+        if (selected === correct) score++;
+        currentIdx++;
+        showQuestion(currentIdx);
+    }
+
+    function finishQuiz() {
+        clearInterval(timerInterval);
+        document.getElementById('quizBox').style.display = 'none';
+        document.getElementById('quizResult').style.display = 'flex';
+
+        const total = currentQuestions.length;
+        document.getElementById('resultText').innerText = `Siz ${total} savoldan ${score} tasini to'g'ri bajardingiz!`;
+
+        generateCertificateCanvas(selectedSubjectName, score, total);
+    }
+
+    function openReviewMode() {
+        document.getElementById('quizResult').style.display = 'none';
+        document.getElementById('reviewBox').style.display = 'flex';
+        reviewIdx = 0;
+        showReviewQuestion(reviewIdx);
+    }
+
+    function showReviewQuestion(index) {
+        const q = currentQuestions[index];
+        const userAnswer = userAnswers[index];
+
+        document.getElementById('reviewQuestionNum').innerText = `Savol ${index + 1}/${currentQuestions.length}`;
+        document.getElementById('reviewQuestionText').innerText = q.question;
+
+        const container = document.getElementById('reviewOptionsContainer');
+        container.innerHTML = '';
+
+        q.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.disabled = true;
+            btn.innerText = opt;
+
+            if (opt === q.correct_answer) {
+                btn.style.background = 'rgba(34, 201, 138, 0.2)';
+                btn.style.borderColor = 'var(--green)';
+                btn.style.color = 'var(--green)';
+            } else if (opt === userAnswer) {
+                btn.style.background = 'rgba(255, 95, 86, 0.2)';
+                btn.style.borderColor = 'var(--red-dot)';
+                btn.style.color = 'var(--red-dot)';
+            }
+            container.appendChild(btn);
+        });
+
+        const nextBtn = document.getElementById('reviewNextBtn');
+        nextBtn.innerHTML = (index >= currentQuestions.length - 1) ? `Yakunlash` : `Keyingi <i class="fa-solid fa-arrow-right"></i>`;
+    }
+
+    function nextReviewQuestion() {
+        reviewIdx++;
+        if (reviewIdx >= currentQuestions.length) {
+            document.getElementById('reviewBox').style.display = 'none';
+            document.getElementById('quizResult').style.display = 'flex';
+            return;
+        }
+        showReviewQuestion(reviewIdx);
+    }
+
+    function generateCertificateCanvas(subject, finalScore, totalQuestions) {
+        const canvas = document.getElementById('certCanvas');
+        const ctx = canvas.getContext('2d');
+        const percentage = Math.round((finalScore / totalQuestions) * 100);
+
+        let tierName;
+        if (percentage < 50) {
+            tierName = "Ishtirokchi";
+        } else if (percentage < 75) {
+            tierName = "Bronza";
+        } else if (percentage < 100) {
+            tierName = "Kumush";
+        } else {
+            tierName = "Oltin";
+        }
+
+        currentCertTier = tierName;
+
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+
+        img.onload = function () {
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            const winnerName = "{{ request.user.student_profile.nickname|default:request.user.username }}";
+            const today = new Date();
+            const dateStr = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
+
+            function fitFontSize(text, startPx, maxWidthRatio, bold) {
+                let size = startPx;
+                const maxWidth = canvas.width * maxWidthRatio;
+                const weight = bold ? 'bold ' : '';
+                ctx.font = `${weight}${size}px Georgia, serif`;
+                while (ctx.measureText(text).width > maxWidth && size > 10) {
+                    size -= 1;
+                    ctx.font = `${weight}${size}px Georgia, serif`;
+                }
+                return size;
+            }
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+
+            const nameStartSize = Math.round(canvas.width * 0.035);
+            const nameSize = fitFontSize(winnerName, nameStartSize, 0.65, true);
+            ctx.font = `bold ${nameSize}px Georgia, serif`;
+            ctx.fillStyle = '#121624';
+            ctx.fillText(winnerName, canvas.width / 2, canvas.height * 0.598);
+
+            const subjText = `${subject} fani bo'yicha`;
+            const subjSize = fitFontSize(subjText, Math.round(canvas.width * 0.022), 0.60, false);
+            ctx.font = `${subjSize}px Georgia, serif`;
+            ctx.fillStyle = '#454859';
+
+            ctx.fillStyle = '#121624';
+            ctx.font = `bold ${Math.round(canvas.width * 0.032)}px Arial, sans-serif`;
+            // Ball va foiz pastroqqa tushirildi (0.77 qilib belgilandi)
+            ctx.fillText(`${finalScore} / ${totalQuestions} (${percentage}%)`, canvas.width / 2, canvas.height * 0.77);
+
+            ctx.textAlign = 'left';
+            ctx.font = `600 ${Math.round(canvas.width * 0.019)}px Arial, sans-serif`;
+            ctx.fillStyle = '#222';
+            ctx.fillText(dateStr, canvas.width * 0.205, canvas.height * 0.878);
+
+            saveTestResultToServer(currentCertTier, finalScore, totalQuestions);
+            openCertFullscreen();
+        };
+
+        img.onerror = function () {
+            drawFallbackCertificate(tierName, subject, finalScore, totalQuestions, percentage);
+            saveTestResultToServer(currentCertTier, finalScore, totalQuestions);
+            openCertFullscreen();
+        };
+
+        img.src = CERT_TEMPLATES[tierName];
+    }
+
+    function drawFallbackCertificate(tierName, subject, finalScore, totalQuestions, percentage) {
+        const canvas = document.getElementById('certCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 800;
+        canvas.height = 500;
+        const w = canvas.width;
+        const h = canvas.height;
+
+        const TIER_STYLES = {
+            "Oltin": { title: "OLTIN SERTIFIKAT", badge: "🥇 OLTIN DARAJA", mainColor: "#d4af37", bg1: "#1c1408", bg2: "#2b1e0a", accent: "#fde68a" },
+            "Kumush": { title: "KUMUSH SERTIFIKAT", badge: "🥈 KUMUSH DARAJA", mainColor: "#94a3b8", bg1: "#0f172a", bg2: "#1e293b", accent: "#f1f5f9" },
+            "Bronza": { title: "BRONZA SERTIFIKAT", badge: "🥉 BRONZA DARAJA", mainColor: "#cd7f32", bg1: "#1a0f0a", bg2: "#2e180d", accent: "#ffedd5" },
+            "Ishtirokchi": { title: "ISHTIROK SERTIFIKATI", badge: "📜 ISHTIROKCHI", mainColor: "#38bdf8", bg1: "#082f49", bg2: "#0f172a", accent: "#bae6fd" }
+        };
+        const tier = TIER_STYLES[tierName] || TIER_STYLES["Ishtirokchi"];
+
+        const bgGradient = ctx.createLinearGradient(0, 0, w, h);
+        bgGradient.addColorStop(0, tier.bg1);
+        bgGradient.addColorStop(1, tier.bg2);
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.strokeStyle = tier.mainColor;
+        ctx.lineWidth = 6;
+        ctx.strokeRect(20, 20, w - 40, h - 40);
+
+        const winnerName = "{{ request.user.student_profile.nickname|default:request.user.username }}";
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = tier.mainColor;
+        ctx.font = 'bold 28px Georgia, serif';
+        ctx.fillText(tier.title, w / 2, 100);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '16px Georgia, serif';
+        ctx.fillText(`Ushbu sertifikat AI testda ishtirok etgani uchun taqdim etiladi`, w / 2, 140);
+
+        ctx.fillStyle = tier.accent;
+        ctx.font = 'bold 26px Georgia, serif';
+        ctx.fillText(winnerName, w / 2, 220);
+
+        ctx.fillStyle = tier.mainColor;
+        ctx.font = 'bold 18px Georgia, serif';
+        ctx.fillText(`Fan: ${subject}`, w / 2, 270);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '16px Georgia, serif';
+        ctx.fillText(`Natija: ${finalScore} / ${totalQuestions} ta to'g'ri javob (${percentage}%)`, w / 2, 330);
+
+        ctx.fillStyle = tier.accent;
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText(tier.badge, w / 2, 370);
+
+        const today = new Date();
+        const dateStr = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '13px Arial';
+        ctx.fillText(`Sana: ${dateStr}`, w / 2, 420);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '11px Arial';
+        ctx.fillText('FaceMaagic jamoasi', w / 2, 460);
+    }
+
+    async function saveTestResultToServer(tier, correct, total) {
+        try {
+            await fetch('/api/save-test-result/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ tier: tier, correct: correct, total: total, subject: selectedSubjectName })
+            });
+        } catch (err) {
+            console.error("Natijani saqlashda xatolik:", err);
+        }
+    }
+
+    function downloadCertificatePDF() {
+        const { jsPDF } = window.jspdf;
+        const canvas = document.getElementById('certCanvas');
+        const winnerName = "{{ request.user.username }}" || "Ishtirokchi";
+        const imgData = canvas.toDataURL('image/png', 1.0);
+
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save(`${winnerName}_Sertifikat_${currentCertTier}.pdf`);
+    }
+
+    function openCertFullscreen() {
+        const canvas = document.getElementById('certCanvas');
+        const overlay = document.getElementById('certFullscreenOverlay');
+        const img = document.getElementById('certFullscreenImg');
+        if (!canvas || !overlay || !img) return;
+
+        img.src = canvas.toDataURL('image/png', 1.0);
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCertFullscreen(e) {
+        if (e) e.stopPropagation();
+        const overlay = document.getElementById('certFullscreenOverlay');
+        if (overlay) overlay.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeCertFullscreen();
+        }
+    });
+
+    function handleModeChange(selectElement) {
+      if (selectElement.value === '100') {
+        const confirmed = confirm(
+          "⚠️ OGOHLANTIRISH!\n\n" +
+          "Siz 100% rejimini tanlamoqchisiz.\n" +
+          "Ushbu rejimda AI mutlaqo ochiq tabiatda ishlaydi va So'kishi/Nomaqbul so'zlar ishlatishi mumkin!\n\n" +
+          "Rostdan ham davom ettirmoqchimisiz?"
+        );
+
+        if (!confirmed) {
+          selectElement.value = previousMode;
+          return;
+        }
+      }
+      previousMode = selectElement.value;
+    }
+
+    function handleFileSelect(e) {
+      const files = Array.from(e.target.files);
+      files.forEach(file => {
+        selectedFiles.push(file);
+      });
+      renderMediaPreviews();
+    }
+
+    function renderMediaPreviews() {
+      const container = document.getElementById('mediaPreviewContainer');
+      container.innerHTML = '';
+
+      selectedFiles.forEach((file, index) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'preview-thumb';
+
+        const url = URL.createObjectURL(file);
+        if (file.type.startsWith('image/')) {
+          thumb.innerHTML = `<img src="${url}"><button class="remove-thumb-btn" onclick="removeFile(${index})">✖</button>`;
+        } else if (file.type.startsWith('video/')) {
+          thumb.innerHTML = `<video src="${url}"></video><button class="remove-thumb-btn" onclick="removeFile(${index})">✖</button>`;
+        }
+        container.appendChild(thumb);
+      });
+    }
+
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      renderMediaPreviews();
+    }
+
+    function setReplyTarget(msgId, author, text) {
+      currentReplyTarget = { msgId, author, text };
+      document.getElementById('replyTargetAuthor').textContent = author;
+      document.getElementById('replyTargetText').textContent = text.length > 30 ? text.substring(0,30) + '...' : text;
+      document.getElementById('replyPreviewBar').style.display = 'flex';
+      document.getElementById('chatInput').focus();
+    }
+
+    function cancelReply() {
+      currentReplyTarget = null;
+      document.getElementById('replyPreviewBar').style.display = 'none';
+    }
+
+    function handleKeyPress(e) {
+      if (e.key === 'Enter') {
+        sendChatMessage();
+      }
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+
+      if (!text && selectedFiles.length === 0) return;
+
+      const chatBody = document.getElementById('chatBody');
+      const modeSelect = document.getElementById('aiModeSelect');
+      const currentMode = modeSelect ? modeSelect.value : '50';
+
+      const tempUserMsgId = 'temp-msg-' + Date.now();
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'chat-message-wrapper user';
+      wrapper.id = tempUserMsgId;
+
+      let replyHTML = '';
+      if (currentReplyTarget) {
+        replyHTML = `<div class="reply-quote-box">↪ <b>${currentReplyTarget.author}:</b> ${currentReplyTarget.text}</div>`;
+      }
+
+      let mediaHTML = '';
+      selectedFiles.forEach(file => {
+        const url = URL.createObjectURL(file);
+        if (file.type.startsWith('image/')) {
+          mediaHTML += `<div class="media-preview"><img src="${url}"></div>`;
+        } else if (file.type.startsWith('video/')) {
+          mediaHTML += `<div class="media-preview"><video src="${url}" controls></video></div>`;
+        }
+      });
+
+      wrapper.innerHTML = `
+        ${replyHTML}
+        <div class="chat-message user">
+          ${text ? `<div>${text}</div>` : ''}
+          ${mediaHTML}
+        </div>
+        <button class="reply-btn" onclick="setReplyTarget('${tempUserMsgId}', 'Siz', '${text || 'Media'}')">↩ Javob berish</button>
+      `;
+
+      chatBody.appendChild(wrapper);
+
+      const formData = new FormData();
+      formData.append('message', text);
+      formData.append('mode', currentMode);
+
+      if (currentSessionId) {
+        formData.append('session_id', currentSessionId);
+      }
+      if (currentReplyTarget && currentReplyTarget.msgId && !currentReplyTarget.msgId.startsWith('temp-')) {
+        formData.append('reply_to_id', currentReplyTarget.msgId);
+      }
+
+      selectedFiles.forEach(file => {
+        formData.append('files', file);
+      });
+
+      input.value = '';
+      selectedFiles = [];
+      renderMediaPreviews();
+      const sentReplyTarget = currentReplyTarget;
+      cancelReply();
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      const aiWrapper = document.createElement('div');
+      aiWrapper.className = 'chat-message-wrapper ai';
+      aiWrapper.innerHTML = `<div class="chat-message ai">Typing...</div>`;
+      chatBody.appendChild(aiWrapper);
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      fetch("{% url 'ai_chat' %}", {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          wrapper.id = data.user_msg_id;
+
+          if (!currentSessionId && data.session_id) {
+            currentSessionId = data.session_id;
+            addChatToSidebar(data.session_id, data.session_title);
+          }
+
+          let aiReplyHTML = '';
+          if (sentReplyTarget) {
+            aiReplyHTML = `<div class="reply-quote-box">↪ <b>${sentReplyTarget.author}:</b> ${sentReplyTarget.text}</div>`;
+          }
+
+          aiWrapper.id = data.ai_msg_id;
+          aiWrapper.innerHTML = `
+            ${aiReplyHTML}
+            <div class="chat-message ai">${data.reply}</div>
+            <button class="reply-btn" onclick="setReplyTarget('${data.ai_msg_id}', 'AI', '${data.reply.replace(/'/g, "\\'")}')">↩ Javob berish</button>
+          `;
+        } else {
+          aiWrapper.innerHTML = `<div class="chat-message ai" style="background:#4a151b; border-color:#8b0000;">Xatolik: ${data.message}</div>`;
+        }
+        chatBody.scrollTop = chatBody.scrollHeight;
+      })
+      .catch(err => {
+        aiWrapper.innerHTML = `<div class="chat-message ai" style="background:#4a151b; border-color:#8b0000;">Xatolik yuz berdi: ${err.message}</div>`;
+        chatBody.scrollTop = chatBody.scrollHeight;
+      });
+    }
+
+    function addChatToSidebar(sessionId, title) {
+      const historyList = document.getElementById('historyList');
+      const item = document.createElement('div');
+      item.className = 'history-item active';
+      item.dataset.id = sessionId;
+      item.textContent = title;
+
+      document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+      historyList.prepend(item);
+    }
+
+    function createNewChat() {
+      currentSessionId = null;
+      currentReplyTarget = null;
+      cancelReply();
+
+      const chatBody = document.getElementById('chatBody');
+      chatBody.innerHTML = `
+        <div class="chat-message-wrapper ai" id="msg-init">
+          <div class="chat-message ai">
+            Yangi suhbat boshlandi. Qisqa va londa qilib so'rayver.
+          </div>
+          <button class="reply-btn" onclick="setReplyTarget('msg-init', 'AI', 'Yangi suhbat boshlandi.')">↩ Javob berish</button>
+        </div>
+      `;
+      document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+    }
+  </script>
+
+</body>
+</html>

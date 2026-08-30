@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FaceMaagic - O'quvchi sifatida ro'yxatdan o'tish</title>
+<style>
+  :root {
+    --bg: #0c1120;
+    --card-bg: #131a2e;
+    --card-header: #10162a;
+    --border: #232b45;
+    --input-bg: #0c1120;
+    --input-border: #2a3250;
+    --text: #f3f4f8;
+    --text-muted: #8b93ac;
+    --accent: #6a5cf0;
+    --accent-2: #8b7cf6;
+    --red-dot: #ff5f56;
+    --yellow-dot: #ffbd2e;
+    --green-dot: #27c93f;
+    --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    font-family: var(--font);
+    color: var(--text);
+    padding: 24px;
+  }
+
+  .window {
+    width: 100%;
+    max-width: 480px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  }
+
+  .window-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--card-header);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .window-dots { display: flex; gap: 8px; }
+
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: var(--red-dot); }
+  .dot.yellow { background: var(--yellow-dot); }
+  .dot.green { background: var(--green-dot); }
+
+  .window-filename { font-size: 13px; color: var(--text-muted); }
+
+  .window-body { padding: 28px; max-height: 85vh; overflow-y: auto; }
+
+  .form-heading {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 18px;
+  }
+
+  .field { margin-bottom: 15px; }
+
+  .field-row { display: flex; gap: 14px; }
+  .field-row .field { flex: 1; min-width: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: #cfd4e6;
+    margin-bottom: 6px;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="tel"],
+  textarea {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: var(--font);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 65px;
+  }
+
+  input::placeholder, textarea::placeholder { color: #5b6486; }
+  input:focus, textarea:focus { border-color: var(--accent); }
+
+  .class-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .grade-btn {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text);
+    padding: 9px 0;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .grade-btn:hover {
+    border-color: var(--accent);
+    background: #1a2238;
+  }
+
+  .grade-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .parallel-container {
+    display: none;
+    margin-top: 8px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .parallel-buttons-grid {
+    display: flex;
+    gap: 6px;
+  }
+
+  .parallel-btn {
+    flex: 1;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-muted);
+    padding: 7px 0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .parallel-btn:hover {
+    border-color: #27c93f;
+    color: #fff;
+  }
+
+  .parallel-btn.active {
+    background: rgba(39, 201, 63, 0.15);
+    border-color: #27c93f;
+    color: #27c93f;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: #cfd4e6;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .checkbox-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+
+  .btn-primary:hover { opacity: 0.92; }
+
+  .form-footer {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .form-footer a {
+    color: var(--accent-2);
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .alert {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .alert-error {
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid #ff6b6b;
+    color: #ff6b6b;
+  }
+  .alert-success {
+    background: rgba(39, 201, 63, 0.1);
+    border: 1px solid #27c93f;
+    color: #27c93f;
+  }
+</style>
+</head>
+<body>
+  <div class="window">
+    <div class="window-bar">
+      <div class="window-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="window-filename">register.html</div>
+    </div>
+
+    <div class="window-body">
+      <h1 class="form-heading">O'quvchi sifatida ro'yxatdan o'tish</h1>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form id="registerForm" action="{% url 'register' %}" method="POST" novalidate>
+        {% csrf_token %}
+
+        <!-- Yashirin sinf inputi (Backendga chiziqchasiz "9A" bo'lib boradi) -->
+        <input type="hidden" id="classroom" name="classroom" value="" required>
+
+        <div class="field-row">
+          <div class="field" style="flex: 2;">
+            <label for="fullname">F.I.SH (Ism Familiya)</label>
+            <input type="text" id="fullname" name="fullname" placeholder="Ali Valiyev" required>
+          </div>
+
+          <div class="field" style="flex: 1;">
+            <label for="nickname">Nickname *</label>
+            <input type="text" id="nickname" name="nickname" placeholder="Ali_Coder" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Sinfingizni tanlang</label>
+          <div class="class-buttons-grid">
+            <button type="button" class="grade-btn" onclick="selectGrade('5', this)">5-sinf</button>
+            <button type="button" class="grade-btn" onclick="selectGrade('6', this)">6-sinf</button>
+            <button type="button" class="grade-btn" onclick="selectGrade('7', this)">7-sinf</button>
+            <button type="button" class="grade-btn" onclick="selectGrade('8', this)">8-sinf</button>
+            <button type="button" class="grade-btn" onclick="selectGrade('9', this)">9-sinf</button>
+            <button type="button" class="grade-btn" onclick="selectGrade('10', this)">10-sinf</button>
+            <button type="button" class="grade-btn" onclick="selectGrade('11', this)">11-sinf</button>
+          </div>
+
+          <div id="parallelContainer" class="parallel-container">
+            <label style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px;">Parallelini tanlang:</label>
+            <div class="parallel-buttons-grid">
+              <button type="button" class="parallel-btn" onclick="selectParallel('A', this)">A</button>
+              <button type="button" class="parallel-btn" onclick="selectParallel('B', this)">B</button>
+              <button type="button" class="parallel-btn" onclick="selectParallel('D', this)">D</button>
+              <button type="button" class="parallel-btn" onclick="selectParallel('E', this)">E</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="phone">Telefon Raqam</label>
+            <input type="tel" id="phone" name="phone" placeholder="+998 90 123 45 67" required>
+          </div>
+          <div class="field">
+            <label for="login">Login</label>
+            <input type="text" id="login" name="login" placeholder="ali_9a" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Parol</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required>
+        </div>
+
+        <div class="field">
+          <label for="bio">Bio (O'zingiz haqingizda - ixtiyoriy)</label>
+          <textarea id="bio" name="bio" placeholder="Dasturlashga qiziqaman..."></textarea>
+        </div>
+
+        <label class="checkbox-row" for="isTeacher">
+          <input type="checkbox" id="isTeacher" name="is_teacher">
+          O'qituvchimisiz? (O'qituvchi sifatida ro'yxatdan o'tish)
+        </label>
+
+        <button type="submit" class="btn-primary">Ro'yxatdan O'tish</button>
+      </form>
+
+      <p class="form-footer">
+        Hisobingiz bormi? <a href="{% url 'login' %}">Tizimga kirish</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    let selectedGradeNum = "";
+    let selectedParallelLetter = "";
+
+    function selectGrade(grade, btnElement) {
+      document.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+
+      selectedGradeNum = grade;
+      document.getElementById('parallelContainer').style.display = 'block';
+      updateClassroomValue();
+    }
+
+    function selectParallel(parallel, btnElement) {
+      document.querySelectorAll('.parallel-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+
+      selectedParallelLetter = parallel;
+      updateClassroomValue();
+    }
+
+    function updateClassroomValue() {
+      if (selectedGradeNum && selectedParallelLetter) {
+        // Chiziqchasiz formatda saqlanadi (masalan: "9A")
+        document.getElementById('classroom').value = `${selectedGradeNum}${selectedParallelLetter}`;
+      }
+    }
+
+    document.getElementById('isTeacher').addEventListener('change', function() {
+      if (this.checked) {
+        window.location.href = "{% url 'register_teacher' %}";
+      }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+      const fullname = document.getElementById('fullname').value.trim();
+      const classroom = document.getElementById('classroom').value.trim();
+      const nickname = document.getElementById('nickname').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const login = document.getElementById('login').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!fullname || !classroom || !nickname || !phone || !login || !password) {
+        e.preventDefault();
+        alert("Iltimos, barcha majburiy maydonlarni va sinf/parallel ma'lumotini to'liq tanlang.");
+      }
+    });
+  </script>
+</body>
+</html>

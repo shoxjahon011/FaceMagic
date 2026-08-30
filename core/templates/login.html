@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FaceMaagic - Tizimga kirish</title>
+<style>
+  :root {
+    --bg: #0c1120;
+    --card-bg: #131a2e;
+    --card-header: #10162a;
+    --border: #232b45;
+    --input-bg: #0c1120;
+    --input-border: #2a3250;
+    --text: #f3f4f8;
+    --text-muted: #8b93ac;
+    --accent: #6a5cf0;
+    --accent-2: #8b7cf6;
+    --red-dot: #ff5f56;
+    --yellow-dot: #ffbd2e;
+    --green-dot: #27c93f;
+    --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    font-family: var(--font);
+    color: var(--text);
+    padding: 24px;
+  }
+
+  .window {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  }
+
+  .window-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--card-header);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .window-dots { display: flex; gap: 8px; }
+
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: var(--red-dot); }
+  .dot.yellow { background: var(--yellow-dot); }
+  .dot.green { background: var(--green-dot); }
+
+  .window-filename { font-size: 13px; color: var(--text-muted); }
+
+  .window-body { padding: 32px 28px; }
+
+  .form-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+
+  .form-subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0 0 26px;
+  }
+
+  .field { margin-bottom: 18px; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: #cfd4e6;
+    margin-bottom: 8px;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: var(--font);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  input::placeholder { color: #5b6486; }
+  input:focus { border-color: var(--accent); }
+
+  .btn-primary {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    padding: 13px 16px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.15s ease;
+  }
+
+  .btn-primary:hover { opacity: 0.92; }
+
+  .form-footer {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .form-footer a {
+    color: var(--accent-2);
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .error-text {
+    color: #ff6b6b;
+    font-size: 12px;
+    margin-top: 6px;
+    display: none;
+  }
+
+  /* Django backend xatolarini ko'rsatish uchun yangi stil */
+  .alert-error {
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid #ff6b6b;
+    color: #ff6b6b;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div class="window">
+    <div class="window-bar">
+      <div class="window-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="window-filename">login.html</div>
+    </div>
+
+    <div class="window-body">
+      <h1 class="form-title">FaceMaagic-ga Kirish</h1>
+      <p class="form-subtitle">Tizimga kirish uchun ma'lumotlarni kiriting</p>
+
+      <!-- Backend xabarlari (masalan, "Login yoki parol xato") -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert-error">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form id="loginForm" action="{% url 'login' %}" method="POST" novalidate>
+        {% csrf_token %}
+        <div class="field">
+          <label for="username">Login / Username</label>
+          <input type="text" id="username" name="username" placeholder="student_ali" required>
+          <div class="error-text" id="usernameError">Loginni kiriting</div>
+        </div>
+
+        <div class="field">
+          <label for="password">Parol (Password)</label>
+          <input type="password" id="password" name="password" placeholder="••••••••••" required>
+          <div class="error-text" id="passwordError">Parolni kiriting</div>
+        </div>
+
+        <button type="submit" class="btn-primary">
+          Tizimga Kirish
+          <span aria-hidden="true">→</span>
+        </button>
+      </form>
+
+      <p class="form-footer">
+        Hali hisobingiz yo'qmi? <a href="{% url 'register' %}">Ro'yxatdan o'tish</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      const username = document.getElementById('username');
+      const password = document.getElementById('password');
+      const usernameError = document.getElementById('usernameError');
+      const passwordError = document.getElementById('passwordError');
+
+      let valid = true;
+
+      if (!username.value.trim()) {
+        usernameError.style.display = 'block';
+        valid = false;
+      } else {
+        usernameError.style.display = 'none';
+      }
+
+      if (!password.value.trim()) {
+        passwordError.style.display = 'block';
+        valid = false;
+      } else {
+        passwordError.style.display = 'none';
+      }
+
+      // Agar maydonlar bo'sh bo'lsa, formani jo'natishni to'xtatadi
+      if (!valid) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>

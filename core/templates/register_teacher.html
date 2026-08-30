@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O'qituvchi Ro'yxatdan O'tish Sahifasi</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: radial-gradient(circle at 15% 15%, #1a1830 0%, #0b0e1a 45%, #05070f 100%);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #e7e9f2;
+    padding: 48px 40px;
+  }
+
+  .header {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+  }
+
+  .header h1 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .header h1 .icon {
+    font-size: 28px;
+    color: #6c5ce7;
+  }
+
+  .header p {
+    margin-top: 10px;
+    margin-left: 42px;
+    color: #8b90a8;
+    font-size: 15px;
+  }
+
+  .panels {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .window {
+    flex: 1.1 1 420px;
+    background: #10131f;
+    border: 1px solid #262a3d;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+  }
+
+  .titlebar {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #23273a;
+  }
+
+  .dots { display: flex; gap: 7px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green { background: #28c840; }
+
+  .titlebar .filename {
+    margin-left: auto;
+    font-size: 13px;
+    color: #6b7080;
+  }
+
+  .window-body {
+    padding: 24px 28px 28px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .field {
+    margin-bottom: 15px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 13.5px;
+    color: #b7bacb;
+    margin-bottom: 6px;
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    background: #191d2c;
+    border: 1px solid #2c3146;
+    color: #eef0f8;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 14.5px;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .field textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    border-color: #6c5ce7;
+  }
+
+  .row-2 {
+    display: flex;
+    gap: 16px;
+  }
+
+  .row-2 .field {
+    flex: 1;
+  }
+
+  .class-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .grade-btn {
+    background: #191d2c;
+    border: 1px solid #2c3146;
+    color: #eef0f8;
+    padding: 9px 0;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .grade-btn:hover {
+    border-color: #6c5ce7;
+    background: #22263d;
+  }
+
+  .grade-btn.active {
+    background: #6c5ce7;
+    border-color: #6c5ce7;
+    color: #fff;
+  }
+
+  .parallel-container {
+    display: none;
+    margin-top: 8px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .parallel-buttons-grid {
+    display: flex;
+    gap: 6px;
+  }
+
+  .parallel-btn {
+    flex: 1;
+    background: #191d2c;
+    border: 1px solid #2c3146;
+    color: #8b90a8;
+    padding: 7px 0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .parallel-btn:hover {
+    border-color: #28c840;
+    color: #fff;
+  }
+
+  .parallel-btn.active {
+    background: rgba(40, 200, 64, 0.15);
+    border-color: #28c840;
+    color: #28c840;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .submit-btn {
+    width: 100%;
+    background: #1fb872;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 0;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background 0.15s ease;
+  }
+
+  .submit-btn:hover { background: #18a563; }
+
+  .alert {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    margin-bottom: 16px;
+  }
+  .alert-error {
+    background: #321313;
+    border: 1px solid #5c1f1f;
+    color: #ff5f57;
+  }
+  .alert-success {
+    background: #133226;
+    border: 1px solid #1f5c48;
+    color: #3ddc97;
+  }
+
+  .info-panel {
+    flex: 1 1 420px;
+    background: #10131f;
+    border: 1px solid #262a3d;
+    border-radius: 14px;
+    padding: 26px 28px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+  }
+
+  .info-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #38b6e8;
+    margin-bottom: 20px;
+  }
+
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .info-item {
+    display: flex;
+    gap: 12px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: #c7cadb;
+  }
+
+  .info-item .arrow {
+    color: #6c5ce7;
+    flex-shrink: 0;
+  }
+
+  .info-item strong {
+    color: #f2f3fa;
+    font-weight: 700;
+  }
+
+  .form-footer {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13.5px;
+    color: #8b90a8;
+  }
+
+  .form-footer a {
+    color: #6c5ce7;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .form-footer a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 900px) {
+    .panels { flex-direction: column; }
+    .row-2 { flex-direction: column; gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1><span class="icon">&#128101;</span> O'qituvchi Ro'yxatdan O'tish Sahifasi</h1>
+    <p>register_teacher.html — Maxsus o'qituvchi ma'lumotlari kiritish formasi</p>
+  </div>
+
+  <div class="panels">
+
+    <div class="window">
+      <div class="titlebar">
+        <div class="dots">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+        <span class="filename">register_teacher.html</span>
+      </div>
+      <div class="window-body">
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <form id="teacherForm" method="POST" action="{% url 'register_teacher' %}" novalidate>
+          {% csrf_token %}
+
+          <!-- Yashirin sinf inputi (Backendga chiziqchasiz "9A" bo'lib boradi) -->
+          <input type="hidden" id="classroom" name="classroom" value="{{ request.POST.classroom|default:'' }}" required>
+
+          <div class="row-2">
+            <div class="field">
+              <label for="fullname">F.I.SH (Ism Familiya)</label>
+              <input type="text" id="fullname" name="fullname" value="{{ request.POST.fullname|default:'' }}" placeholder="Dilshod Rahmatov" required />
+            </div>
+            <div class="field">
+              <label for="nickname">Nickname (Taxallus) *</label>
+              <input type="text" id="nickname" name="nickname" value="{{ request.POST.nickname|default:'' }}" placeholder="Teacher_Dilshod" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="bio">Bio (O'zingiz haqingizda - ixtiyoriy)</label>
+            <textarea id="bio" name="bio" placeholder="Matematika fanidan dars beraman...">{{ request.POST.bio|default:'' }}</textarea>
+          </div>
+
+          <div class="row-2">
+            <div class="field">
+              <label for="login">Login</label>
+              <input type="text" id="login" name="username" value="{{ request.POST.username|default:'' }}" placeholder="teacher_math" required />
+            </div>
+            <div class="field">
+              <label for="password">Parol</label>
+              <input type="password" id="password" name="password" placeholder="••••••••" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Qaysi sinf rahbari?</label>
+            <div class="class-buttons-grid">
+              <button type="button" class="grade-btn" onclick="selectGrade('5', this)">5-sinf</button>
+              <button type="button" class="grade-btn" onclick="selectGrade('6', this)">6-sinf</button>
+              <button type="button" class="grade-btn" onclick="selectGrade('7', this)">7-sinf</button>
+              <button type="button" class="grade-btn" onclick="selectGrade('8', this)">8-sinf</button>
+              <button type="button" class="grade-btn" onclick="selectGrade('9', this)">9-sinf</button>
+              <button type="button" class="grade-btn" onclick="selectGrade('10', this)">10-sinf</button>
+              <button type="button" class="grade-btn" onclick="selectGrade('11', this)">11-sinf</button>
+            </div>
+
+            <div id="parallelContainer" class="parallel-container">
+              <label style="font-size: 11.5px; color: #8b90a8; margin-bottom: 4px;">Parallelini tanlang:</label>
+              <div class="parallel-buttons-grid">
+                <button type="button" class="parallel-btn" onclick="selectParallel('A', this)">A</button>
+                <button type="button" class="parallel-btn" onclick="selectParallel('B', this)">B</button>
+                <button type="button" class="parallel-btn" onclick="selectParallel('D', this)">D</button>
+                <button type="button" class="parallel-btn" onclick="selectParallel('E', this)">E</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="subject">Qaysi fan o'qituvchisi?</label>
+            <input type="text" id="subject" name="subject" value="{{ request.POST.subject|default:'' }}" placeholder="Matematika" required />
+          </div>
+
+          <button type="submit" class="submit-btn">O'qituvchi Sifatida Saqlash</button>
+        </form>
+
+        <div class="form-footer">
+          O'quvchimisiz? <a href="{% url 'register' %}">O'quvchi sifatida ro'yxatdan o'tish</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <div class="info-title"><span>&#128100;</span> Formaning Boshqa Sahifalardan Farqi</div>
+      <div class="info-list">
+        <div class="info-item">
+          <span class="arrow">&#10132;</span>
+          <span><strong>Taxallus (Nickname):</strong> Boshqa foydalanuvchilar va o'quvchilar ko'radigan noyob chat nomi.</span>
+        </div>
+        <div class="info-item">
+          <span class="arrow">&#10132;</span>
+          <span><strong>Sinf va Fan:</strong> O'qituvchi o'zining rahbarlik sinfi va dars beradigan fanini aniq kiritadi.</span>
+        </div>
+        <div class="info-item">
+          <span class="arrow">&#10132;</span>
+          <span><strong>Admin Tasdiqlashi:</strong> Ro'yxatdan o'tgach, admin tasdiqlagandan keyin to'liq huquqlar beriladi.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let selectedGradeNum = "";
+    let selectedParallelLetter = "";
+
+    function selectGrade(grade, btnElement) {
+      document.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+
+      selectedGradeNum = grade;
+      document.getElementById('parallelContainer').style.display = 'block';
+      updateClassroomValue();
+    }
+
+    function selectParallel(parallel, btnElement) {
+      document.querySelectorAll('.parallel-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+
+      selectedParallelLetter = parallel;
+      updateClassroomValue();
+    }
+
+    function updateClassroomValue() {
+      if (selectedGradeNum && selectedParallelLetter) {
+        // Chiziqchasiz formatda yuboriladi (masalan: "9A")
+        document.getElementById('classroom').value = `${selectedGradeNum}${selectedParallelLetter}`;
+      }
+    }
+
+    document.getElementById('teacherForm').addEventListener('submit', function (e) {
+      const fullname = document.getElementById('fullname').value.trim();
+      const classroom = document.getElementById('classroom').value.trim();
+      const nickname = document.getElementById('nickname').value.trim();
+      const login = document.getElementById('login').value.trim();
+      const password = document.getElementById('password').value;
+      const subject = document.getElementById('subject').value.trim();
+
+      if (!fullname || !classroom || !nickname || !login || !password || !subject) {
+        e.preventDefault();
+        alert("Iltimos, barcha majburiy maydonlarni va sinf/parallel ma'lumotini to'liq tanlang.");
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mening Yutuqlarim - FaceMaagic</title>
+<style>
+  :root {
+    --bg: #0c1120;
+    --card-bg: rgba(19, 26, 46, 0.75);
+    --border: rgba(35, 43, 69, 0.8);
+    --text: #f3f4f8;
+    --text-muted: #8b93ac;
+    --accent: #6a5cf0;
+    --gold: #d4af37;
+    --green: #3ddc84;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: radial-gradient(circle at 15% 15%, #1a1830 0%, #0b0e1a 45%, #05070f 100%);
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    color: var(--text);
+    padding: 24px;
+  }
+
+  .navbar {
+    max-width: 1100px;
+    background: rgba(19, 26, 46, 0.45);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 auto 30px;
+  }
+
+  .nav-brand {
+    font-size: 18px; font-weight: 800;
+    background: linear-gradient(135deg, #8b7cf6, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-decoration: none;
+  }
+
+  .nav-links { display: flex; gap: 20px; list-style: none; }
+  .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; }
+  .nav-links a.active { color: var(--text); font-weight: 700; }
+
+  .header { max-width: 1100px; margin: 0 auto 30px; }
+  .header h1 { font-size: 28px; font-weight: 800; }
+  .header-stats { display: flex; gap: 16px; margin-top: 12px; }
+  .stat { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; }
+  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+  .stat-value { font-size: 18px; font-weight: 800; color: var(--gold); }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  /* GRID LAYOUT */
+  .achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .week-separator {
+    font-size: 15px; font-weight: 700; color: var(--accent);
+    margin-top: 24px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    grid-column: 1 / -1;
+  }
+
+  /* KATAKCHA CARD */
+  .achievement-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    user-select: none;
+  }
+
+  .achievement-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(106, 92, 240, 0.2);
+  }
+
+  .achievement-card.completed {
+    border-color: rgba(212, 175, 55, 0.4);
+    background: rgba(212, 175, 55, 0.05);
+  }
+
+  .achievement-card.equipped {
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+  }
+
+  .card-img-box {
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.3);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .card-img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+
+  .lock-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(1px);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    height: 32px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+
+  .card-points {
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  /* KARTA ICHIDAGI BAJARILGAN/JAMI MATNI */
+  .card-progress-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .card-progress-bg {
+    width: 100%;
+    height: 5px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .card-progress-fill {
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .achievement-card.completed .card-progress-fill {
+    background: var(--green);
+  }
+
+  .equipped-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: var(--gold);
+    color: #000;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  /* MODAL (POPUP) OYNA */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal-backdrop.active { display: flex; }
+
+  .modal-card {
+    background: #131a2e;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    padding: 24px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px; right: 16px;
+    font-size: 20px;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  .modal-img-box {
+    width: 80px; height: 80px;
+    margin: 0 auto 12px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+  .modal-points { font-size: 13px; color: var(--gold); font-weight: 700; margin-bottom: 10px; }
+
+  .modal-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; }
+
+  .modal-progress-container {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 18px;
+  }
+  .modal-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .modal-equip-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.04);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+
+  .modal-equip-option input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--gold);
+    cursor: pointer;
+  }
+
+  .modal-save-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold), #f59e0b);
+    color: #000;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 15px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="{% url 'home' %}" class="nav-brand">⚡ FaceMaagic</a>
+    <ul class="nav-links">
+      <li><a href="{% url 'home' %}">Bosh sahifa</a></li>
+      <li><a href="{% url 'student_profile' %}">Profil</a></li>
+      <li><a href="{% url 'achievements' %}" class="active">🏆 Yutuqlar</a></li>
+    </ul>
+  </nav>
+
+  <div class="header">
+    <h1>🏆 Mening Yutuqlarim</h1>
+    <div class="header-stats">
+      <div class="stat"><div class="stat-label">Bajarilgan</div><div class="stat-value">{{ completed_count|default:0 }}/{{ total_count|default:0 }}</div></div>
+      <div class="stat"><div class="stat-label">Olingan Balllar</div><div class="stat-value">{{ total_points|default:0 }}</div></div>
+    </div>
+  </div>
+
+  <div class="container">
+    {% if achievements %}
+      <div class="achievement-grid">
+        {% regroup achievements by week as weeks %}
+
+        {% for week in weeks %}
+          <div class="week-separator">📅 {{ week.grouper }}-hafta</div>
+
+          {% for achievement in week.list %}
+            <div class="achievement-card {% if achievement.completed %}completed{% endif %} {% if achievement.is_equipped %}equipped{% endif %}"
+                 onclick="openModal('{{ achievement.name|escapejs }}', '{{ achievement.description|escapejs }}', '+{{ achievement.points }} ball', '{{ achievement.icon_image.url|default:'' }}', {{ achievement.completed|yesno:'true,false' }}, {{ achievement.is_equipped|yesno:'true,false' }}, '{{ achievement.current_progress|default:0 }}', '{{ achievement.target_progress|default:1 }}', '{{ achievement.progress_percent|default:0 }}')">
+
+              {% if achievement.is_equipped %}
+                <span class="equipped-badge">⚡ TAQILGAN</span>
+              {% endif %}
+
+              <div class="card-img-box">
+                {% if achievement.icon_image %}
+                  <img src="{{ achievement.icon_image.url }}" class="card-img" />
+                {% else %}
+                  <span style="font-size: 28px;">🏆</span>
+                {% endif %}
+
+                {% if not achievement.completed %}
+                  <div class="lock-overlay">🔒</div>
+                {% endif %}
+              </div>
+
+              <div class="card-title">{{ achievement.name }}</div>
+              <div class="card-points">+{{ achievement.points }} pts</div>
+
+              <div class="card-progress-text">
+                {{ achievement.current_progress|default:0 }}/{{ achievement.target_progress|default:1 }}
+              </div>
+
+              <div class="card-progress-bg">
+                <div class="card-progress-fill" style="width: {{ achievement.progress_percent|default:0 }}%;"></div>
+              </div>
+            </div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>Hozircha yutuqlar mavjud emas.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- POPUP MODAL -->
+  <div class="modal-backdrop" id="achievementModal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-card">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+
+      <div class="modal-img-box" id="modalImgBox"></div>
+
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-points" id="modalPoints"></div>
+
+      <div class="modal-desc" id="modalDesc"></div>
+
+      <div class="modal-progress-container">
+        <div class="modal-progress-label">
+          <span>Bajarilish darajasi:</span>
+          <span id="modalProgressText" style="color: var(--gold);">0 / 0</span>
+        </div>
+        <div class="card-progress-bg" style="height: 8px;">
+          <div class="card-progress-fill" id="modalProgressFill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <form method="POST" action="{% url 'equip_title' %}">
+        {% csrf_token %}
+        <input type="hidden" name="selected_title" id="modalTitleInput">
+
+        <div id="equipOptionBox" class="modal-equip-option" style="display: none;">
+          <input type="checkbox" id="modalCheckbox" onchange="toggleCheckbox(this)">
+          <label for="modalCheckbox" style="font-size: 13px; font-weight: 700; cursor: pointer;">Profilga taqish</label>
+        </div>
+
+        <button type="submit" id="modalSaveBtn" class="modal-save-btn" style="display: none;">SAQLASH</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentTitleName = "";
+
+    function openModal(name, desc, points, imgUrl, isCompleted, isEquipped, currentProgress, targetProgress, percent) {
+      currentTitleName = name;
+      document.getElementById('modalTitle').innerText = name;
+      document.getElementById('modalDesc').innerText = desc;
+      document.getElementById('modalPoints').innerText = points;
+
+      document.getElementById('modalProgressText').innerText = `${currentProgress} / ${targetProgress}`;
+      const fillBar = document.getElementById('modalProgressFill');
+      fillBar.style.width = `${percent}%`;
+      fillBar.style.background = isCompleted ? 'var(--green)' : 'var(--accent)';
+
+      const imgBox = document.getElementById('modalImgBox');
+      if (imgUrl) {
+        imgBox.innerHTML = `<img src="${imgUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">`;
+      } else {
+        imgBox.innerHTML = `<span style="font-size:36px;">🏆</span>`;
+      }
+
+      const equipOptionBox = document.getElementById('equipOptionBox');
+      const saveBtn = document.getElementById('modalSaveBtn');
+      const checkbox = document.getElementById('modalCheckbox');
+      const input = document.getElementById('modalTitleInput');
+
+      if (isCompleted) {
+        equipOptionBox.style.display = 'flex';
+        saveBtn.style.display = 'block';
+        checkbox.checked = isEquipped;
+        input.value = isEquipped ? name : '';
+      } else {
+        equipOptionBox.style.display = 'none';
+        saveBtn.style.display = 'none';
+      }
+
+      document.getElementById('achievementModal').classList.add('active');
+    }
+
+    function toggleCheckbox(cb) {
+      document.getElementById('modalTitleInput').value = cb.checked ? currentTitleName : '';
+    }
+
+    function closeModal() {
+      document.getElementById('achievementModal').classList.remove('active');
+    }
+
+    function closeModalOnBackdrop(e) {
+      if (e.target.classList.contains('modal-backdrop')) {
+        closeModal();
+      }
+    }
+  </script>
+
+</body>
+</html>
